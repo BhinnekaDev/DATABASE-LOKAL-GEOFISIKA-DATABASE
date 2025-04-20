@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36" version="26.2.13" pages="4">
   <diagram id="R2lEEEUBdFMjLlhIrx00" name="ERD LOGIN">
-    <mxGraphModel dx="2004" dy="739" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0" adaptiveColors="simple" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
+    <mxGraphModel dx="1812" dy="616" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0" adaptiveColors="simple" extFonts="Permanent Marker^https://fonts.googleapis.com/css?family=Permanent+Marker">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -55,16 +55,16 @@
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-43" value="&lt;b&gt;id:&amp;nbsp;SERIAL PK&lt;/b&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
           <mxGeometry y="30" width="250" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="J9g6D6FZZZPxMK1S1QNR-44" value="&lt;i&gt;admin_id: UUID FK&amp;nbsp;&amp;nbsp;&lt;/i&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
+        <mxCell id="J9g6D6FZZZPxMK1S1QNR-47" value="ip_address: TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
           <mxGeometry y="60" width="250" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="J9g6D6FZZZPxMK1S1QNR-47" value="ip_address: TEXT" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
+        <mxCell id="J9g6D6FZZZPxMK1S1QNR-44" value="&lt;i&gt;admin_id: UUID FK&amp;nbsp;&amp;nbsp;&lt;/i&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
           <mxGeometry y="90" width="250" height="30" as="geometry" />
         </mxCell>
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-42" value="login_time:&amp;nbsp;&lt;code data-end=&quot;718&quot; data-start=&quot;707&quot;&gt;TIMESTAMP&lt;/code&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
           <mxGeometry y="120" width="250" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="J9g6D6FZZZPxMK1S1QNR-48" value="user_agent: TEXT ( (informasi browser/OS)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
+        <mxCell id="J9g6D6FZZZPxMK1S1QNR-48" value="user_agent: TEXT (informasi browser/OS)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
           <mxGeometry y="150" width="250" height="30" as="geometry" />
         </mxCell>
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-49" value="created_at:&amp;nbsp;&lt;code data-end=&quot;854&quot; data-start=&quot;843&quot;&gt;TIMESTAMP&lt;/code&gt; (waktu data dicatat)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
