@@ -1,14 +1,15 @@
 // index.js
 require("dotenv").config();
 const express = require("express");
-const { createClient } = require("@supabase/supabase-js");
 const authRoutes = require("./routes/authRoutes");
+const { createClient } = require("@supabase/supabase-js");
+const jsonMiddleware = require("./middlewares/bodyParser");
 
 const app = express();
 const port = 3000;
 
 // Middleware untuk parsing JSON dalam request body
-app.use(express.json());
+app.use(jsonMiddleware);
 
 // Inisialisasi Supabase dengan URL dan Key yang didapat dari environment variables
 const supabaseUrl = process.env.SUPABASE_URL;
