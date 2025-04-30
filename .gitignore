@@ -1,4 +1,6 @@
 # Jangan upload file environment
+my-api/.env
+my-api/node_modules
 .env
 supabase/.env
 .env.local
