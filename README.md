@@ -37,6 +37,10 @@ Server akan berjalan di `http://localhost:3000`
 
 **Base URL:** `http://localhost:3000/auth`
 
+> ✨ Seluruh endpoint autentikasi telah dilengkapi dengan validasi menggunakan middleware untuk memastikan data yang masuk sudah sesuai format dan lengkap.
+
+---
+
 ### 📝 POST `/register`
 > Registrasi admin baru.
 
@@ -52,6 +56,13 @@ Server akan berjalan di `http://localhost:3000`
 }
 ```
 
+**Validasi:**
+- `email` harus format email yang valid.
+- `password` minimal 6 karakter.
+- Semua field wajib diisi.
+
+---
+
 ### 🔑 POST `/login`
 > Login dan log aktivitas admin.
 
@@ -63,7 +74,7 @@ Server akan berjalan di `http://localhost:3000`
 }
 ```
 
-**Respons:**
+**Respons Sukses:**
 ```json
 {
   "message": "Login berhasil",
@@ -73,6 +84,9 @@ Server akan berjalan di `http://localhost:3000`
 }
 ```
 
+**Validasi:**
+- `email` dan `password` wajib diisi dan valid.
+
 ---
 
 ## 🧱 Teknologi yang Digunakan
@@ -81,13 +95,14 @@ Server akan berjalan di `http://localhost:3000`
 - **Supabase** – Autentikasi & database
 - **Luxon** – Zona waktu lokal (WIB)
 - **request-ip** – Logging alamat IP
+- **express-validator** – Validasi request body
 
 ---
 
 ## 📌 Catatan
 
 - Sistem ini masih dalam tahap awal (fase autentikasi).
-- Akan dikembangkan fitur seperti:
+- Fitur lanjutan yang akan dikembangkan:
   - Manajemen data geofisika
   - Dashboard admin & pengguna
   - Log aktivitas lengkap
@@ -104,4 +119,4 @@ _Membangun solusi data geofisika yang terintegrasi & efisien._
 
 ## 📬 Kontak
 
-Buka _issue_ atau hubungi kami untuk pertanyaan dan masukan.
+Buka _issue_ di GitHub atau hubungi kami untuk pertanyaan dan masukan.
