@@ -7,6 +7,7 @@ const swaggerUi = require("swagger-ui-express");
 const authRoutes = require("@routes/authRoutes");
 const { createClient } = require("@supabase/supabase-js");
 const jsonMiddleware = require("@middlewares/bodyParser");
+const adminRoutes = require("@routes/adminRoutes");
 
 const app = express();
 const port = 3000;
@@ -72,6 +73,9 @@ app.use(
 
 // Routing autentikasi
 app.use("/auth", authRoutes);
+
+// Routing admin
+app.use("/admin", adminRoutes);
 
 app.listen(port, () => {
     console.log(`Server berjalan di http://localhost:${port}`);

@@ -5,7 +5,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-15" value="admin" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="1" vertex="1">
-          <mxGeometry x="-590" y="320" width="270" height="240" as="geometry">
+          <mxGeometry x="-590" y="320" width="270" height="210" as="geometry">
             <mxRectangle x="355" y="110" width="70" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -27,9 +27,6 @@
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-50" value="role: admin_role&amp;nbsp; (ENUM: &#39;operator&#39;, &#39;admin&#39;)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-15" vertex="1">
           <mxGeometry y="180" width="270" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="J9g6D6FZZZPxMK1S1QNR-23" value="create_at: TIMESTAMP (Waktu admin dibuat)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-15" vertex="1">
-          <mxGeometry y="210" width="270" height="30" as="geometry" />
-        </mxCell>
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-24" value="auth.users" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="1" vertex="1">
           <mxGeometry x="-815" y="630" width="280" height="150" as="geometry">
             <mxRectangle x="355" y="110" width="70" height="30" as="alternateBounds" />
@@ -48,7 +45,7 @@
           <mxGeometry y="120" width="280" height="30" as="geometry" />
         </mxCell>
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-38" value="login_log" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="1" vertex="1">
-          <mxGeometry x="-265" y="510" width="250" height="180" as="geometry">
+          <mxGeometry x="-265" y="510" width="250" height="150" as="geometry">
             <mxRectangle x="355" y="110" width="70" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -63,9 +60,6 @@
         </mxCell>
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-48" value="user_agent: TEXT (informasi browser/OS)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
           <mxGeometry y="120" width="250" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="J9g6D6FZZZPxMK1S1QNR-49" value="created_at:&amp;nbsp;&lt;code data-end=&quot;854&quot; data-start=&quot;843&quot;&gt;TIMESTAMP&lt;/code&gt; (waktu data dicatat)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-38" vertex="1">
-          <mxGeometry y="150" width="250" height="30" as="geometry" />
         </mxCell>
         <mxCell id="g77cIDYcJQ-5B31MvDpY-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="J9g6D6FZZZPxMK1S1QNR-32" target="J9g6D6FZZZPxMK1S1QNR-25" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -82,7 +76,7 @@
         <mxCell id="RQ_A0CB_XDI2GSO4idqh-0" />
         <mxCell id="RQ_A0CB_XDI2GSO4idqh-1" parent="RQ_A0CB_XDI2GSO4idqh-0" />
         <mxCell id="RQ_A0CB_XDI2GSO4idqh-2" value="admin" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="RQ_A0CB_XDI2GSO4idqh-1" vertex="1">
-          <mxGeometry x="-590" y="320" width="270" height="240" as="geometry">
+          <mxGeometry x="-590" y="320" width="270" height="210" as="geometry">
             <mxRectangle x="355" y="110" width="70" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -103,9 +97,6 @@
         </mxCell>
         <mxCell id="RQ_A0CB_XDI2GSO4idqh-8" value="role: admin_role&amp;nbsp; (ENUM: &#39;operator&#39;, &#39;admin&#39;)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="RQ_A0CB_XDI2GSO4idqh-2" vertex="1">
           <mxGeometry y="180" width="270" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="RQ_A0CB_XDI2GSO4idqh-9" value="create_at: TIMESTAMP (Waktu admin dibuat)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="RQ_A0CB_XDI2GSO4idqh-2" vertex="1">
-          <mxGeometry y="210" width="270" height="30" as="geometry" />
         </mxCell>
         <mxCell id="RQ_A0CB_XDI2GSO4idqh-10" value="auth.users" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="RQ_A0CB_XDI2GSO4idqh-1" vertex="1">
           <mxGeometry x="-820" y="610" width="280" height="150" as="geometry">

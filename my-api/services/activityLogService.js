@@ -1,5 +1,6 @@
 // Inisialisasi Supabase client
 const { createClient } = require("@supabase/supabase-js");
+const { DateTime } = require("luxon");
 
 const supabase = createClient(
     process.env.SUPABASE_URL,
@@ -14,6 +15,9 @@ const addActivityLog = async (
     ipAddress,
     userAgent
 ) => {
+    const localTime = DateTime.now()
+        .setZone("Asia/Jakarta")
+        .toLocaleString(DateTime.DATETIME_FULL);
     try {
         const { error } = await supabase.from("activity_log").insert([
             {
@@ -22,6 +26,7 @@ const addActivityLog = async (
                 description,
                 ip_address: ipAddress,
                 user_agent: userAgent,
+                created_at: localTime,
             },
         ]);
         if (error)

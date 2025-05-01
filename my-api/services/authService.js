@@ -1,6 +1,7 @@
+// services/authService.js
 require("request-ip");
-const { DateTime } = require("luxon");
 const { createClient } = require("@supabase/supabase-js");
+const { DateTime } = require("luxon");
 
 // Inisialisasi Supabase
 const supabase = createClient(
@@ -61,7 +62,6 @@ const addLoginLog = async (adminId, ipAddress, userAgent) => {
     const localTime = DateTime.now()
         .setZone("Asia/Jakarta")
         .toLocaleString(DateTime.DATETIME_FULL);
-
     const { error } = await supabase.from("login_log").upsert(
         {
             admin_id: adminId,
