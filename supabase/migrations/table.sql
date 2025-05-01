@@ -55,7 +55,6 @@ create table "public"."admin" (
     "first_name" text,
     "last_name" text,
     "role" admin_role not null,
-    "create_at" timestamp without time zone default now(),
     "email" text
 );
 
@@ -129,7 +128,6 @@ create table "public"."login_log" (
     "ip_address" text,
     "login_time" timestamp without time zone,
     "user_agent" text,
-    "created_at" timestamp without time zone default CURRENT_TIMESTAMP,
     "admin_id" uuid not null
 );
 
