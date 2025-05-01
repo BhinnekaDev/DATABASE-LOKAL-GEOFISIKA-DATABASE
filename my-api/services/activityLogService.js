@@ -1,4 +1,4 @@
-// services/activityLogService.js
+// Inisialisasi Supabase client
 const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
@@ -6,6 +6,7 @@ const supabase = createClient(
     process.env.SUPABASE_KEY
 );
 
+// Fungsi untuk menambahkan log aktivitas ke tabel activity_log
 const addActivityLog = async (
     adminId,
     action,

@@ -43,7 +43,6 @@ create table "public"."activity_log" (
     "ip_address" text,
     "action" text,
     "user_agent" text,
-    "target" text,
     "created_at" timestamp without time zone default CURRENT_TIMESTAMP,
     "admin_id" uuid not null
 );

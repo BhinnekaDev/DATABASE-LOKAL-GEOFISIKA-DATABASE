@@ -1,25 +1,22 @@
 const { validationResult } = require("express-validator");
 
-// Middleware untuk menangani hasil validasi dari express-validator
+// Middleware untuk menangani hasil validasi
 const handleValidasi = (req, res, next) => {
-    // Mengambil semua error hasil validasi dari request
     const errors = validationResult(req);
 
-    // Jika ada error (validasi gagal)
+    // Jika ada error, kirim respons 422 dengan detail kesalahan
     if (!errors.isEmpty()) {
-        // Kirim response 422 (Unprocessable Entity) beserta detail error
         return res.status(422).json({
             message: "Validasi gagal",
             errors: errors.array().map((err) => ({
-                field: err.param, // Nama field yang error
-                message: err.msg, // Pesan error yang sesuai
+                field: err.param,
+                message: err.msg,
             })),
         });
     }
 
-    // Jika tidak ada error, lanjut ke middleware/controller berikutnya
+    // Jika validasi lolos, lanjut ke proses berikutnya
     next();
 };
 
-// Mengekspor middleware handleValidasi agar bisa digunakan di routes/controller
 module.exports = handleValidasi;
