@@ -5,7 +5,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-15" value="admin" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="1" vertex="1">
-          <mxGeometry x="-585" y="110" width="270" height="240" as="geometry">
+          <mxGeometry x="-585" y="110" width="270" height="210" as="geometry">
             <mxRectangle x="355" y="110" width="70" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>
@@ -26,9 +26,6 @@
         </mxCell>
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-50" value="role: admin_role&amp;nbsp; (ENUM: &#39;operator&#39;, &#39;admin&#39;)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-15" vertex="1">
           <mxGeometry y="180" width="270" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="J9g6D6FZZZPxMK1S1QNR-23" value="create_at: TIMESTAMP (Waktu admin dibuat)" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rotatable=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="J9g6D6FZZZPxMK1S1QNR-15" vertex="1">
-          <mxGeometry y="210" width="270" height="30" as="geometry" />
         </mxCell>
         <mxCell id="J9g6D6FZZZPxMK1S1QNR-24" value="auth.users" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;labelBackgroundColor=none;rounded=1;" parent="1" vertex="1">
           <mxGeometry x="-820" y="370" width="280" height="150" as="geometry">
