@@ -3,12 +3,12 @@ const activityLogService = require("@services/activityLogService");
 
 const { DateTime } = require("luxon");
 
-// Fungsi untuk registrasi pengguna baru
+// Controller untuk pendaftaran admin
 const register = async (req, res) => {
     const { email, password, first_name, last_name, photo, role } = req.body;
 
     try {
-        // Registrasi pengguna baru melalui authService
+        // Registrasi admin baru melalui authService
         const data = await authService.signUp(
             email,
             password,
@@ -30,17 +30,17 @@ const register = async (req, res) => {
 
         // Menambahkan log aktivitas ke dalam database
         await activityLogService.addActivityLog(
-            data.user.id, // ID pengguna yang baru dibuat
+            data.user.id, // ID admin yang baru dibuat
             "DAFTAR", // Jenis aktivitas
             `Admin baru dengan email ${email} berhasil didaftarkan`, // Deskripsi aktivitas
-            ipAddress, // Alamat IP pengguna
+            ipAddress, // Alamat IP admin
             userAgent // User agent browser atau client
         );
 
-        // Mengirimkan response sukses dengan data pengguna
+        // Mengirimkan response sukses dengan data admin
         return res.status(201).json({
             message: "Admin berhasil dibuat",
-            user: data.user, // Data pengguna yang baru didaftarkan
+            user: data.user, // Data admin yang baru didaftarkan
         });
     } catch (error) {
         // Menangani error jika pendaftaran gagal
@@ -48,23 +48,23 @@ const register = async (req, res) => {
     }
 };
 
-// Fungsi untuk login pengguna
+// Controller untuk proses login admin
 const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        // Proses login pengguna melalui authService
+        // Proses login admin melalui authService
         const data = await authService.signIn(email, password, req);
 
-        // Mengambil role pengguna berdasarkan user_id
+        // Mengambil role admin berdasarkan user_id
         const userRole = await authService.getUserRole(data.user.id);
 
-        // Mengirimkan response dengan token akses dan informasi pengguna
+        // Mengirimkan response dengan token akses dan informasi admin
         res.status(200).json({
             message: "Login berhasil",
             access_token: data.session.access_token, // Token untuk autentikasi
-            user_id: data.user.id, // ID pengguna
-            role: userRole, // Role pengguna (admin, user, dll)
+            user_id: data.user.id, // ID admin
+            role: userRole, // Role admin (admin, user, dll)
         });
     } catch (error) {
         // Menangani error jika login gagal
