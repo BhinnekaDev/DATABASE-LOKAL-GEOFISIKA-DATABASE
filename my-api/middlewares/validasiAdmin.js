@@ -1,7 +1,7 @@
 const { body } = require("express-validator");
 
-// Validasi input registrasi
-const validasiRegister = [
+// Validasi input Admin
+const validasiAdmin = [
     body("email")
         .notEmpty()
         .withMessage("Email wajib diisi")
@@ -42,15 +42,4 @@ const validasiRegister = [
         .withMessage("Role harus admin atau operator"),
 ];
 
-// Validasi input login
-const validasiLogin = [
-    body("email")
-        .notEmpty()
-        .withMessage("Email wajib diisi")
-        .isEmail()
-        .withMessage("Format email tidak valid"),
-
-    body("password").notEmpty().withMessage("Password wajib diisi"),
-];
-
-module.exports = { validasiRegister, validasiLogin };
+module.exports = { validasiAdmin };

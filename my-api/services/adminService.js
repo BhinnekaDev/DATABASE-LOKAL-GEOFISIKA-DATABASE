@@ -30,7 +30,7 @@ const editAdmin = async (user_id, data) => {
     );
     if (authError) {
         console.error("Gagal update Auth:", authError.message);
-        throw new Error("Gagal update metadata atau email user");
+        throw new Error("Gagal memperbarui Auth. Cek kembali user ID.");
     }
 
     // Update data admin di tabel "admin"
