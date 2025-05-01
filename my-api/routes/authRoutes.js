@@ -6,13 +6,15 @@ const {
     validasiLogin,
 } = require("../middlewares/validasiAuth");
 const handleValidasi = require("../middlewares/handleValidasi");
+const authenticate = require("../middlewares/authenticate");
 
 // Route register dengan validasi
 router.post(
     "/register",
     validasiRegister,
     handleValidasi,
-    authController.register
+    authController.register,
+    authenticate
 );
 
 // Route login dengan validasi

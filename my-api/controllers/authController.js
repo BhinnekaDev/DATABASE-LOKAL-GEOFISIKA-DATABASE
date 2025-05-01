@@ -1,12 +1,14 @@
 // controllers/authController.js
 const authService = require("../services/authService");
+const activityLogService = require("../services/activityLogService");
+
+const { DateTime } = require("luxon");
 
 // Fungsi untuk registrasi pengguna baru
 const register = async (req, res) => {
     const { email, password, first_name, last_name, photo, role } = req.body;
 
     try {
-        // Mendaftar pengguna baru menggunakan authService
         const data = await authService.signUp(
             email,
             password,
@@ -14,6 +16,22 @@ const register = async (req, res) => {
             last_name,
             photo,
             role
+        );
+
+        // Simpan activity log setelah admin berhasil dibuat
+        DateTime.now()
+            .setZone("Asia/Jakarta")
+            .toLocaleString(DateTime.DATETIME_FULL);
+        const ipAddress =
+            req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+        const userAgent = req.headers["user-agent"];
+
+        await activityLogService.addActivityLog(
+            data.user.id,
+            "DAFTAR",
+            `Admin baru dengan email ${email} berhasil didaftarkan`,
+            ipAddress,
+            userAgent
         );
 
         return res.status(201).json({
