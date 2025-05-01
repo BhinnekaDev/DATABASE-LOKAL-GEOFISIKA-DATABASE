@@ -56,7 +56,8 @@ create table "public"."admin" (
     "first_name" text,
     "last_name" text,
     "role" admin_role not null,
-    "create_at" timestamp without time zone default now()
+    "create_at" timestamp without time zone default now(),
+    "email" text
 );
 
 
@@ -247,6 +248,8 @@ CREATE UNIQUE INDEX activity_log_admin_id_key ON public.activity_log USING btree
 
 CREATE UNIQUE INDEX activity_log_pkey ON public.activity_log USING btree (admin_id);
 
+CREATE UNIQUE INDEX admin_email_key ON public.admin USING btree (email);
+
 CREATE UNIQUE INDEX admin_pkey ON public.admin USING btree (id);
 
 CREATE UNIQUE INDEX admin_user_id_unique ON public.admin USING btree (user_id);
@@ -338,6 +341,8 @@ alter table "public"."activity_log" add constraint "activity_log_admin_id_fkey" 
 alter table "public"."activity_log" validate constraint "activity_log_admin_id_fkey";
 
 alter table "public"."activity_log" add constraint "activity_log_admin_id_key" UNIQUE using index "activity_log_admin_id_key";
+
+alter table "public"."admin" add constraint "admin_email_key" UNIQUE using index "admin_email_key";
 
 alter table "public"."admin" add constraint "admin_user_id_fkey" FOREIGN KEY (user_id) REFERENCES auth.users(id) ON DELETE CASCADE not valid;
 
@@ -1350,6 +1355,3 @@ as permissive
 for select
 to public
 using ((auth.uid() = user_id));
-
-
-

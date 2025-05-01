@@ -10,20 +10,35 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Fungsi signup
 const signUp = async (email, password, first_name, last_name, photo, role) => {
     try {
-        // Registrasi user di Supabase
+        // Cek apakah email sudah digunakan di tabel admin
+        const { data: existing, error: checkError } = await supabase
+            .from("admin")
+            .select("email")
+            .eq("email", email)
+            .maybeSingle();
+
+        if (checkError) {
+            throw new Error("Gagal memeriksa email: " + checkError.message);
+        }
+
+        if (existing) {
+            throw new Error(
+                "Email sudah digunakan. Silakan gunakan email lain."
+            );
+        }
+
+        // Proses registrasi
         const { data, error } = await supabase.auth.signUp({
             email,
             password,
         });
 
-        if (error) {
-            throw new Error(error.message);
-        }
+        if (error) throw new Error(error.message);
 
         const userId = data.user.id;
-
-        // Menambahkan display_name di profil pengguna
         const displayName = `${first_name} ${last_name}`;
+
+        // Update display name
         const { error: updateError } = await supabase.auth.updateUser({
             data: { display_name: displayName },
         });
@@ -34,20 +49,21 @@ const signUp = async (email, password, first_name, last_name, photo, role) => {
             );
         }
 
-        // Masukkan data ke tabel admin
+        // Simpan data ke tabel admin
         const { error: insertError } = await supabase.from("admin").insert({
             user_id: userId,
+            email,
             first_name,
             last_name,
+            email,
             photo,
             role,
         });
 
         if (insertError) {
-            // Jika ada error saat insert ke tabel admin, buang user dari auth dan lempar error
             await supabase.auth.admin.deleteUser(userId);
             throw new Error(
-                "Gagal memasukkan data ke tabel admin: " + insertError.message
+                "Gagal menyimpan data ke tabel admin: " + insertError.message
             );
         }
 
