@@ -241,10 +241,6 @@ alter sequence "public"."weather_data_id_seq" owned by "public"."weather_data"."
 
 alter sequence "public"."wind_direction_and_speed_id_seq" owned by "public"."wind_direction_and_speed"."id";
 
-CREATE UNIQUE INDEX activity_log_admin_id_key ON public.activity_log USING btree (admin_id);
-
-CREATE UNIQUE INDEX activity_log_pkey ON public.activity_log USING btree (admin_id);
-
 CREATE UNIQUE INDEX admin_email_key ON public.admin USING btree (email);
 
 CREATE UNIQUE INDEX admin_pkey ON public.admin USING btree (id);
@@ -291,8 +287,6 @@ CREATE UNIQUE INDEX weather_data_pkey ON public.weather_data USING btree (id);
 
 CREATE UNIQUE INDEX wind_direction_and_speed_pkey ON public.wind_direction_and_speed USING btree (id);
 
-alter table "public"."activity_log" add constraint "activity_log_pkey" PRIMARY KEY using index "activity_log_pkey";
-
 alter table "public"."admin" add constraint "admin_pkey" PRIMARY KEY using index "admin_pkey";
 
 alter table "public"."air_pressure" add constraint "air_pressure_pkey" PRIMARY KEY using index "air_pressure_pkey";
@@ -336,8 +330,6 @@ alter table "public"."wind_direction_and_speed" add constraint "wind_direction_a
 alter table "public"."activity_log" add constraint "activity_log_admin_id_fkey" FOREIGN KEY (admin_id) REFERENCES admin(user_id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
 
 alter table "public"."activity_log" validate constraint "activity_log_admin_id_fkey";
-
-alter table "public"."activity_log" add constraint "activity_log_admin_id_key" UNIQUE using index "activity_log_admin_id_key";
 
 alter table "public"."admin" add constraint "admin_email_key" UNIQUE using index "admin_email_key";
 
