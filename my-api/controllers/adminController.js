@@ -1,6 +1,7 @@
 // controllers/adminController.js
 const adminService = require("@services/adminService");
 const { validate } = require("uuid");
+const activityLogService = require("@services/activityLogService");
 
 // Controller untuk edit admin
 const editAdmin = async (req, res) => {
@@ -14,6 +15,19 @@ const editAdmin = async (req, res) => {
     }
 
     try {
+        // Mendapatkan informasi IP address dan user agent untuk log
+        const ipAddress =
+            req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+        const userAgent = req.headers["user-agent"];
+
+        // Menambahkan log aktivitas ke dalam database
+        await activityLogService.addActivityLog(
+            user_id, // ID admin yang baru dibuat
+            "MENGUBAH", // Jenis aktivitas
+            `Admin dengan ID ${user_id} berhasil diubah`, // Deskripsi aktivitas
+            ipAddress, // Alamat IP admin
+            userAgent // User agent browser atau client
+        );
         // Panggil service editAdmin
         const hasil = await adminService.editAdmin(user_id, req.body);
         res.status(200).json(hasil);
