@@ -48,4 +48,30 @@ const editAdmin = async (user_id, data) => {
     return { message: "Admin berhasil diperbarui" };
 };
 
-module.exports = { editAdmin };
+// Fungsi untuk delete data admin (Auth dan tabel admin)
+const deleteAdmin = async (user_id) => {
+    // Hapus user di bagian Auth Supabase
+    const { error: authError } = await supabase.auth.admin.deleteUser(user_id);
+    if (authError) {
+        console.error("Gagal hapus user di Auth:", authError.message);
+        throw new Error(
+            "Gagal menghapus admin dari Auth. Cek kembali user ID."
+        );
+    }
+
+    // Hapus data admin di tabel "admin"
+    const { error: dbError } = await supabase
+        .from("admin")
+        .delete()
+        .eq("user_id", user_id);
+
+    if (dbError) {
+        console.error("Gagal hapus data admin di DB:", dbError.message);
+        throw new Error("Gagal menghapus data admin dari database.");
+    }
+
+    // Kalau semua berhasil
+    return { message: "Admin berhasil dihapus" };
+};
+
+module.exports = { editAdmin, deleteAdmin };

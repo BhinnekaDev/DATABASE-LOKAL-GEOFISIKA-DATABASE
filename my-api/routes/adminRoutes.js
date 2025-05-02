@@ -13,4 +13,7 @@ router.put(
     adminController.editAdmin
 );
 
+// Rute untuk delete data admin berdasarkan user_id
+router.delete("/delete/:user_id", adminController.deleteAdmin);
+
 module.exports = router;
