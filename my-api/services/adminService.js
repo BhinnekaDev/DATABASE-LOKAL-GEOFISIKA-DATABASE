@@ -74,4 +74,28 @@ const deleteAdmin = async (user_id) => {
     return { message: "Admin berhasil dihapus" };
 };
 
-module.exports = { editAdmin, deleteAdmin };
+// Funsi untuk fetch data admin (tabel admin)
+const fetchAdmin = async () => {
+    const { data, error } = await supabase.from("admin").select("*");
+    if (error) {
+        console.error("Gagal fetch data admin:", error.message);
+        throw new Error("Gagal fetch data admin");
+    }
+    return data;
+};
+
+// Fungsi untuk fetch data admin berdasarkan user_id (tabel admin)
+const fetchAdminById = async (user_id) => {
+    const { data, error } = await supabase
+        .from("admin")
+        .select("*")
+        .eq("user_id", user_id)
+        .single();
+    if (error) {
+        console.error("Gagal fetch data admin:", error.message);
+        throw new Error("Gagal fetch data admin");
+    }
+    return data;
+};
+
+module.exports = { editAdmin, deleteAdmin, fetchAdmin, fetchAdminById };

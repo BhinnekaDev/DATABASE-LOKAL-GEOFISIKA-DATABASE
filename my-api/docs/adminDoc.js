@@ -121,4 +121,111 @@
  *                 message:
  *                   type: string
  *                   example: Terjadi kesalahan pada server. Coba lagi nanti.
+ *
+ * /admin/fetch/{user_id}:
+ *   get:
+ *     summary: Ambil data admin berdasarkan UUID
+ *     description: Mengambil data admin atau operator tertentu berdasarkan UUID.
+ *     tags: [Admin Atau Operator]
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         required: true
+ *         description: UUID dari admin yang ingin diambil datanya
+ *     responses:
+ *       200:
+ *         description: Data admin berhasil diambil
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user_id:
+ *                   type: string
+ *                   format: uuid
+ *                   example: 1388461e-dde4-44c2-9234-15cb9dc2c93b
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                   example: admin@example.com
+ *                 first_name:
+ *                   type: string
+ *                   example: Bhinneka
+ *                 last_name:
+ *                   type: string
+ *                   example: Dev
+ *                 photo:
+ *                   type: string
+ *                   example: https://example.com/foto.jpg
+ *                 role:
+ *                   type: string
+ *                   example: operator
+ *       400:
+ *         description: UUID tidak valid atau gagal fetch data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: user_id harus berupa UUID yang valid
+ *       404:
+ *         description: Admin tidak ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Admin tidak ditemukan
+ *
+ * /admin/fetch:
+ *   get:
+ *     summary: Ambil semua data admin atau operator
+ *     description: Mengambil seluruh data dari tabel admin atau operator yang tersimpan di database.
+ *     tags: [Admin Atau Operator]
+ *     responses:
+ *       200:
+ *         description: Berhasil mengambil data admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                     format: uuid
+ *                     example: "a3f7b4f2-3b47-4df8-91f9-5cfa3f5a6e87"
+ *                   email:
+ *                     type: string
+ *                     example: admin@example.com
+ *                   first_name:
+ *                     type: string
+ *                     example: Bhinneka
+ *                   last_name:
+ *                     type: string
+ *                     example: Dev
+ *                   photo:
+ *                     type: string
+ *                     example: https://example.com/foto.jpg
+ *                   role:
+ *                     type: string
+ *                     example: operator
+ *       400:
+ *         description: Gagal mengambil data admin
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Gagal fetch data admin
  */
