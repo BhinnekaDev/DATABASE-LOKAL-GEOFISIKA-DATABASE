@@ -12,4 +12,11 @@ router.post(
     evaporationController.insertEvaporation
 );
 
+router.put(
+    "/edit/:user_id/:id_date",
+    validasiEvaporation,
+    handleValidasi,
+    evaporationController.editEvaporation
+);
+
 module.exports = router;
