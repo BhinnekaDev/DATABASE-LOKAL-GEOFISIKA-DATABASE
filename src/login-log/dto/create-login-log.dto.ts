@@ -7,7 +7,7 @@ export class CreateLoginLogDto {
 
   @IsNotEmpty()
   @IsString()
-  login_time: Date;
+  login_time: string;
 
   @IsNotEmpty()
   @IsString()

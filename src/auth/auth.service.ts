@@ -169,11 +169,15 @@ export class AuthService {
 
     const role = await this.getRoleByUserId(user.id);
 
+    const login_time = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
     await this.LoginLogService.logLogin({
       admin_id: user.id,
       ip_address,
       user_agent,
-      login_time: new Date(),
+      login_time: login_time,
     });
 
     return {

@@ -25,6 +25,10 @@ export class LoginLogService {
   async logLogin(dto: CreateLoginLogDto) {
     const { admin_id, ip_address, user_agent } = dto;
 
+    const login_time = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
     const { data, error } = await this.supabase
       .from('login_log')
       .upsert(
@@ -33,7 +37,7 @@ export class LoginLogService {
             admin_id,
             ip_address,
             user_agent,
-            login_time: new Date(),
+            login_time: login_time,
           },
         ],
         { onConflict: 'admin_id' },
