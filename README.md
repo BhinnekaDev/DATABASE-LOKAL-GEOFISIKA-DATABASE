@@ -26,22 +26,24 @@ Buat file `.env` di root folder proyek dan tambahkan konfigurasi berikut:
 ```env
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 ```
 
 ### 4. **Jalankan Server**
 Untuk memulai server, jalankan perintah berikut:
 ```bash
-node index.js
+node npm run start
 ```
 Server akan berjalan di `http://localhost:3000`.
+Dokumentasi Api akan berjalan di `http://localhost:3000/api`:
 
 ## 🧱 **Teknologi yang Digunakan**
 
-- **Node.js + Express** – Backend server
-- **Supabase** – Autentikasi & database
-- **Luxon** – Zona waktu lokal (WIB)
-- **request-ip** – Logging alamat IP pengguna
-- **express-validator** – Validasi request body
+* **NestJS** – Framework backend yang digunakan untuk membangun aplikasi yang scalable.
+* **Supabase** – Layanan backend untuk autentikasi pengguna dan database.
+* **Luxon** – Library untuk menangani zona waktu lokal (WIB).
+* **request-ip** – Untuk log alamat IP pengguna.
+* **express-validator** – Untuk validasi request body.
 
 ---
 
