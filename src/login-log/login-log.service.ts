@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
 import { CreateLoginLogDto } from '@/login-log/dto/create-login-log.dto';
 
 dotenv.config();
@@ -21,7 +22,9 @@ export class LoginLogService {
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
-  // Simpan Login Log
+  /**
+   * Simpan login log.
+   */
   async logLogin(dto: CreateLoginLogDto) {
     const { admin_id, ip_address, user_agent } = dto;
 
@@ -46,6 +49,37 @@ export class LoginLogService {
 
     if (error) {
       console.error('Gagal menyimpan login log:', error.message);
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  /**
+   * Mengambil data semua login log.
+   */
+  async getAllLoginLog() {
+    const { data, error } = await this.supabase.from('login_log').select('*');
+
+    if (error) {
+      console.error('Gagal mengambil data login log:', error.message);
+      throw new Error(error.message);
+    }
+
+    return data;
+  }
+
+  /**
+   * Mengambil data login log berdasarkan admin_id.
+   */
+  async getLoginLogByUserId(user_id: string) {
+    const { data, error } = await this.supabase
+      .from('login_log')
+      .select('*')
+      .eq('admin_id', user_id);
+
+    if (error) {
+      console.error('Gagal mengambil data login log:', error.message);
       throw new Error(error.message);
     }
 

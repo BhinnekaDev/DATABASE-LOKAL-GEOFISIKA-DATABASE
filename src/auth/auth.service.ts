@@ -1,6 +1,5 @@
 import * as dotenv from 'dotenv';
 import { ConfigService } from '@nestjs/config';
-import { toZonedTime, format } from 'date-fns-tz';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 

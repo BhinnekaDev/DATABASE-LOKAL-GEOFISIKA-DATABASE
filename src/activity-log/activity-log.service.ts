@@ -26,7 +26,9 @@ export class ActivityLogService {
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
-  // Simpan activity log
+  /**
+   * Simpan activity log.
+   */
   async logActivity(dto: CreateActivityLogDto) {
     const { admin_id, action, description, ip_address, user_agent } = dto;
 
@@ -51,6 +53,37 @@ export class ActivityLogService {
 
     if (error) {
       console.error('Gagal menyimpan activity log:', error.message);
+    }
+
+    return data;
+  }
+
+  /**
+   * Mengambil data semua activity log.
+   */
+  async getAllActivityLog() {
+    const { data, error } = await this.supabase
+      .from('activity_log')
+      .select('*');
+
+    if (error) {
+      console.error('Gagal mengambil data activity log:', error.message);
+    }
+
+    return data;
+  }
+
+  /**
+   * Mengambil data activity log berdasarkan admin_id.
+   */
+  async getActivityLogByUserId(user_id: string) {
+    const { data, error } = await this.supabase
+      .from('activity_log')
+      .select('*')
+      .eq('admin_id', user_id);
+
+    if (error) {
+      console.error('Gagal mengambil data activity log:', error.message);
     }
 
     return data;

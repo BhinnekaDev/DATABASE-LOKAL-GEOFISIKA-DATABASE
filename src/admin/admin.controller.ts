@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { Controller, Delete, Param, Req, Put, Body, Get } from '@nestjs/common';
 
 import { AdminService } from '@/admin/admin.service';
@@ -44,12 +44,18 @@ export class AdminController {
 
   // Route untuk ambil data admin
   @Get('get')
+  @ApiOkResponse({
+    description: 'Berhasil mengambil data admin.',
+  })
   async getAdminData() {
     return this.adminService.getAdmin();
   }
 
   // Route untuk ambil data admin berdasarkan user_id
   @Get('get/:user_id')
+  @ApiOkResponse({
+    description: 'Berhasil mengambil data admin berdasarkan user id.',
+  })
   async getAdminDataByUserId(@Param('user_id') user_id: string) {
     return this.adminService.getAdminDataByUserId(user_id);
   }

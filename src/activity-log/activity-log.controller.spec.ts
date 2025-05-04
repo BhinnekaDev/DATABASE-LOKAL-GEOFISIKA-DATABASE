@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+
 import { ActivityLogController } from '@/activity-log/activity-log.controller';
 
 describe('ActivityLogController', () => {
