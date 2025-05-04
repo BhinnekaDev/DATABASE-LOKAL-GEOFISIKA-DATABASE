@@ -1,5 +1,6 @@
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Controller, Post, Body } from '@nestjs/common';
+
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateActivityLogDto } from '@/activity-log/dto/create-activity-log.dto';
 

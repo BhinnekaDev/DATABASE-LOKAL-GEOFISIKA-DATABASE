@@ -20,4 +20,8 @@ export class CreateActivityLogDto {
   @IsNotEmpty()
   @IsString()
   user_agent: string;
+
+  @IsNotEmpty()
+  @IsString()
+  created_at: string;
 }

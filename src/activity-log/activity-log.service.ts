@@ -1,6 +1,8 @@
 import * as dotenv from 'dotenv';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+
+import { TimeHelperService } from '@/helpers/time-helper.service';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { CreateActivityLogDto } from '@/activity-log/dto/create-activity-log.dto';
 
@@ -10,7 +12,10 @@ dotenv.config();
 export class ActivityLogService {
   private supabase: SupabaseClient;
 
-  constructor(private configService: ConfigService) {
+  constructor(
+    private configService: ConfigService,
+    private timeHelperService: TimeHelperService,
+  ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
 
@@ -25,6 +30,14 @@ export class ActivityLogService {
   async logActivity(dto: CreateActivityLogDto) {
     const { admin_id, action, description, ip_address, user_agent } = dto;
 
+    const timeZone = 'Asia/Jakarta';
+    const date = new Date();
+
+    const formattedCreatedAt = this.timeHelperService.formatCreatedAt(
+      date,
+      timeZone,
+    );
+
     const { data, error } = await this.supabase.from('activity_log').insert([
       {
         admin_id,
@@ -32,6 +45,7 @@ export class ActivityLogService {
         description,
         ip_address,
         user_agent,
+        created_at: formattedCreatedAt,
       },
     ]);
 

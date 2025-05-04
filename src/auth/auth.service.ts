@@ -1,10 +1,13 @@
 import * as dotenv from 'dotenv';
 import { ConfigService } from '@nestjs/config';
+import { toZonedTime, format } from 'date-fns-tz';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
 import { LoginDto } from '@/auth/dto/login.dto';
 import { RegisterDto } from '@/auth/dto/register.dto';
 import { LoginLogService } from '@/login-log/login-log.service';
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { TimeHelperService } from '@/helpers/time-helper.service';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { AdminUser, SignInResponse, SignUpResponse } from '@/auth/auth.types';
 
@@ -17,8 +20,9 @@ export class AuthService {
   // Supabase Client
   constructor(
     private configService: ConfigService,
-    private activityLogService: ActivityLogService,
     private LoginLogService: LoginLogService,
+    private timeHelperService: TimeHelperService,
+    private activityLogService: ActivityLogService,
   ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
@@ -106,12 +110,21 @@ export class AuthService {
     const firstNameFromDB = adminData.first_name;
     const lastNameFromDB = adminData.last_name;
 
+    const timeZone = 'Asia/Jakarta';
+    const date = new Date();
+
+    const formattedCreatedAt = this.timeHelperService.formatCreatedAt(
+      date,
+      timeZone,
+    );
+
     await this.activityLogService.logActivity({
       admin_id: id_role,
       action: 'Daftar',
       description: `${firstNameFromDB} ${lastNameFromDB} mendaftarkan ${first_name} ${last_name} dengan email ${email}`,
       ip_address,
       user_agent,
+      created_at: formattedCreatedAt,
     });
 
     const { data: dbData, error: dbError } = await this.supabase

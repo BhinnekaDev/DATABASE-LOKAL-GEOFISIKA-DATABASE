@@ -5,6 +5,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import { DeleteAdminDto } from '@/admin/dto/delete-admin.dto';
 import { AdminUser, DeleteResponse } from '@/admin/admin.types';
+import { TimeHelperService } from '@/helpers/time-helper.service';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 
 dotenv.config();
@@ -15,6 +16,7 @@ export class AdminService {
 
   constructor(
     private configService: ConfigService,
+    private timeHelperService: TimeHelperService,
     private activityLogService: ActivityLogService,
   ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
@@ -95,6 +97,14 @@ export class AdminService {
     const targetName = `${target.first_name} ${target.last_name}`;
     const role = this.formatRole(target.role);
 
+    const timeZone = 'Asia/Jakarta';
+    const date = new Date();
+
+    const formattedCreatedAt = this.timeHelperService.formatCreatedAt(
+      date,
+      timeZone,
+    );
+
     // Catat log aktivitas
     await this.activityLogService.logActivity({
       admin_id: id_role,
@@ -102,6 +112,7 @@ export class AdminService {
       description: `${deleterName} menghapus ${targetName} dari database.`,
       ip_address,
       user_agent,
+      created_at: formattedCreatedAt,
     });
 
     // Hapus dari Supabase Auth

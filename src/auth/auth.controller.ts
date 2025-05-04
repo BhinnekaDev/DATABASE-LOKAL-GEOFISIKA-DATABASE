@@ -1,8 +1,4 @@
 import { Request } from 'express';
-import { LoginDto } from '@/auth/dto/login.dto';
-import { AuthService } from '@/auth/auth.service';
-import { RegisterDto } from '@/auth/dto/register.dto';
-import { SignUpResponse, SignInResponse } from '@/auth/auth.types';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   Req,
@@ -13,6 +9,11 @@ import {
   Controller,
   ValidationPipe,
 } from '@nestjs/common';
+
+import { LoginDto } from '@/auth/dto/login.dto';
+import { AuthService } from '@/auth/auth.service';
+import { RegisterDto } from '@/auth/dto/register.dto';
+import { SignUpResponse, SignInResponse } from '@/auth/auth.types';
 
 @ApiTags('Autentikasi')
 @Controller('auth')
