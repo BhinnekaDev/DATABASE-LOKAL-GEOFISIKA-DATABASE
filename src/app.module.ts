@@ -5,6 +5,7 @@ import { AuthModule } from '@/auth/auth.module';
 import { AppController } from '@/app.controller';
 import { AdminModule } from '@/admin/admin.module';
 import { LoginLogModule } from '@/login-log/login-log.module';
+import { EvaporationModule } from '@/evaporation/evaporation.module';
 import { ActivityLogModule } from '@/activity-log/activity-log.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { ActivityLogModule } from '@/activity-log/activity-log.module';
     }),
     LoginLogModule,
     AdminModule,
+    EvaporationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

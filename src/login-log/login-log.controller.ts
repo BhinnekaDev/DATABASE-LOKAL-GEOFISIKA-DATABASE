@@ -18,7 +18,7 @@ export class LoginLogController {
 
   // Route untuk mendapatkan semua login log
   @ApiOkResponse({ description: 'Berhasil mendapatkan semua login log' })
-  @Get()
+  @Get(`/get`)
   async getAllLog() {
     return await this.loginLogService.getAllLoginLog();
   }
@@ -27,7 +27,7 @@ export class LoginLogController {
   @ApiOkResponse({
     description: 'Berhasil mendapatkan login log berdasarkan user_id',
   })
-  @Get(':user_id')
+  @Get('/get/:user_id')
   async getLogByUserId(@Param('user_id') user_id: string) {
     return await this.loginLogService.getLoginLogByUserId(user_id);
   }

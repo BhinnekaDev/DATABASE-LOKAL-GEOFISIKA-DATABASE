@@ -17,14 +17,14 @@ export class ActivityLogController {
   }
 
   // Route untuk mendapatkan semua log aktivitas
-  @Get()
+  @Get(`/get`)
   @ApiOkResponse({ description: 'Berhasil Menampilkan semua log aktivitas' })
   async getAllLog() {
     return await this.activityLogService.getAllActivityLog();
   }
 
   // Route untuk mendapatkan log aktivitas berdasarkan user_id
-  @Get('/:user_id')
+  @Get('/get/:user_id')
   @ApiOkResponse({
     description: 'Berhasil Menampilkan log aktivitas berdasarkan admin_id',
   })
