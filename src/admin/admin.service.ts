@@ -57,7 +57,7 @@ export class AdminService {
   /**
    * Mengambil data admin berdasarkan user_id (yang akan dihapus).
    */
-  private async getAdminDataByUserId(user_id: string) {
+  private async getPartAdminDataByUserId(user_id: string) {
     const { data, error } = await this.supabase
       .from('admin')
       .select('first_name, last_name, role')
@@ -140,7 +140,7 @@ export class AdminService {
     }
 
     // Ambil data admin yang melakukan pembaruan
-    const target = await this.getAdminDataByUserId(user_id);
+    const target = await this.getPartAdminDataByUserId(user_id);
     const admin = await this.getAdminDataByRole(id_role);
     const updaterName = `${admin.first_name} ${admin.last_name}`;
     const roleTarget = this.roleHelperService.formatRole(target.role);
@@ -204,7 +204,7 @@ export class AdminService {
     const deleterName = `${admin.first_name} ${admin.last_name}`;
 
     // Ambil data user yang akan dihapus
-    const target = await this.getAdminDataByUserId(user_id);
+    const target = await this.getPartAdminDataByUserId(user_id);
     const targetName = `${target.first_name} ${target.last_name}`;
     const role = this.roleHelperService.formatRole(target.role);
 
@@ -249,5 +249,41 @@ export class AdminService {
       user: adminUser,
       status: 'success',
     };
+  }
+
+  /**
+   * Mengambil data admin atau operator dari Supabase.
+   */
+  async getAdmin(): Promise<AdminUser[]> {
+    const { data, error } = await this.supabase
+      .from('admin')
+      .select('id, email, first_name, last_name, photo, role, user_id');
+
+    if (error) {
+      throw new BadRequestException(
+        'Gagal mengambil data admin: ' + error.message,
+      );
+    }
+
+    return data as AdminUser[];
+  }
+
+  /**
+   * Mengambil data admin atau operator dari Supabase berdasarkan user_id.
+   */
+  async getAdminDataByUserId(user_id: string): Promise<AdminUser> {
+    const { data, error } = await this.supabase
+      .from('admin')
+      .select('id, email, first_name, last_name, photo, role, user_id')
+      .eq('user_id', user_id)
+      .single();
+
+    if (error) {
+      throw new BadRequestException(
+        'Gagal mengambil data admin: ' + error.message,
+      );
+    }
+
+    return data as AdminUser;
   }
 }

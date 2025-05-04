@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { Controller, Delete, Param, Req, Put, Body } from '@nestjs/common';
+import { Controller, Delete, Param, Req, Put, Body, Get } from '@nestjs/common';
 
 import { AdminService } from '@/admin/admin.service';
 import { DeleteAdminDto } from '@/admin/dto/delete-admin.dto';
@@ -40,5 +40,17 @@ export class AdminController {
     const userAgent = req.headers['user-agent'] as string;
 
     return this.adminService.deleteAdmin(params, ipAddress, userAgent);
+  }
+
+  // Route untuk ambil data admin
+  @Get('get')
+  async getAdminData() {
+    return this.adminService.getAdmin();
+  }
+
+  // Route untuk ambil data admin berdasarkan user_id
+  @Get('get/:user_id')
+  async getAdminDataByUserId(@Param('user_id') user_id: string) {
+    return this.adminService.getAdminDataByUserId(user_id);
   }
 }
