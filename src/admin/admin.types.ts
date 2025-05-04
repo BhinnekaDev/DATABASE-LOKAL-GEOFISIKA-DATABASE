@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export type Role = 'admin' | 'operator';
+export enum Role {
+  ADMIN = 'admin',
+  OPERATOR = 'operator',
+}
 
 export class AdminUser {
   @ApiProperty({
@@ -31,11 +34,12 @@ export class AdminUser {
     description: 'Foto profil admin atau operator',
     example: 'https://contoh.com/bhinnekaDev.jpg',
   })
-  photo: string;
+  photo?: string;
 
   @ApiProperty({
     description: 'Peran admin atau operator',
     example: 'admin',
+    enum: Role,
   })
   role: Role;
 
@@ -44,6 +48,20 @@ export class AdminUser {
     example: 'user-id-123',
   })
   user_id: string;
+}
+
+export class EditResponse {
+  @ApiProperty({
+    description: 'Data pengguna yang diubah',
+    type: AdminUser,
+  })
+  user: AdminUser;
+
+  @ApiProperty({
+    description: 'Status pengubahan',
+    example: 'success',
+  })
+  status: string;
 }
 
 export class DeleteResponse {

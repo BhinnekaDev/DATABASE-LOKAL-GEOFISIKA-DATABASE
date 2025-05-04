@@ -20,6 +20,7 @@ import { SignUpResponse, SignInResponse } from '@/auth/auth.types';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // Route untuk register
   @Post('register/:id_role')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Register Admin atau Operator' })
@@ -44,6 +45,7 @@ export class AuthController {
     );
   }
 
+  // Route untuk login
   @Post('login')
   @ApiOperation({ summary: 'Login Admin atau Operator' })
   @ApiResponse({
