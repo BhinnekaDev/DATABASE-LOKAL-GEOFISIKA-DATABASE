@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import { ActivityLogService } from '@/activity-log/activity-log.service';
+import { EditMaxTemperatureDto } from '@/max-temperatur/dto/edit-max-temperature.dto';
 import { CreateMaxTemperatureDto } from '@/max-temperatur/dto/create-max-temperature.dto';
 
 dotenv.config();
@@ -92,7 +93,7 @@ export class MaxTemperaturService {
     const namaAdmin = `${first_name} ${last_name}`;
 
     // 3. Simpan data max temperatur
-    const { data: insertedMaxTemperature, error: evaporationError } =
+    const { data: insertedMaxTemperature, error: maxTemperatureError } =
       await this.supabase
         .from('max_temperature')
         .insert({
@@ -102,11 +103,11 @@ export class MaxTemperaturService {
         .select()
         .single();
 
-    if (evaporationError) {
+    if (maxTemperatureError) {
       return {
         success: false,
         message: 'Gagal menyimpan data evaporation',
-        error: evaporationError,
+        error: maxTemperatureError,
       };
     }
 
@@ -117,7 +118,7 @@ export class MaxTemperaturService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Max Temperature',
+      action: 'Menambahkan Data Temperatur Maksimal',
       description: `${namaAdmin} Menambahkan data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
@@ -128,6 +129,95 @@ export class MaxTemperaturService {
       success: true,
       message: 'Data max_temperature berhasil disimpan',
       data: insertedMaxTemperature,
+    };
+  }
+
+  /**
+   * Mengubah data max temperatur dan mencatat ke activity log
+   */
+  async updateMaxTemperature(
+    dto: EditMaxTemperatureDto,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    const { id_date, user_id, date, max_temperature } = dto;
+
+    // 1. Cek apakah tanggal ada di tabel date_data
+    const { data: tanggalData, error: tanggalError } = await this.supabase
+      .from('date_data')
+      .select('id')
+      .eq('id', id_date)
+      .single();
+
+    if (tanggalError || !tanggalData) {
+      return {
+        success: false,
+        message: 'Tanggal dengan id_date tersebut tidak ditemukan',
+        error: tanggalError,
+      };
+    }
+
+    // 2. Ambil data admin
+    const adminResponse = await this.getAdminData(user_id);
+    if (!adminResponse.success || !adminResponse.data) {
+      return {
+        success: false,
+        message: 'Data admin tidak ditemukan',
+        error: adminResponse.error,
+      };
+    }
+
+    const { first_name, last_name } = adminResponse.data;
+    const namaAdmin = `${first_name} ${last_name}`;
+
+    // 3. Simpan data max temperatur
+    const { error: maxTemperatureError } = await this.supabase
+      .from('max_temperature')
+      .update({ max_temperature })
+      .eq('id_date', id_date);
+
+    if (maxTemperatureError) {
+      return {
+        success: false,
+        message: 'Gagal menyimpan data evaporation',
+        error: maxTemperatureError,
+      };
+    }
+
+    // 4. Update tanggal
+    const { error: updateDateError } = await this.supabase
+      .from('date_data')
+      .update({ date })
+      .eq('id', id_date)
+      .select()
+      .single();
+
+    if (updateDateError) {
+      return {
+        success: false,
+        message: 'Gagal memperbarui tanggal',
+        error: updateDateError,
+      };
+    }
+
+    // 5. Mencatat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    await this.activityLogService.logActivity({
+      admin_id: user_id,
+      action: 'Mengubah Data Temperatur Maksimal',
+      description: `${namaAdmin} Mengubah data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      created_at: createdAt,
+    });
+
+    return {
+      success: true,
+      message: 'Data temperatur maksimal berhasil diperbarui',
+      data: max_temperature,
     };
   }
 }

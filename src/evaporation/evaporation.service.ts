@@ -118,7 +118,7 @@ export class EvaporationService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Evaporation',
+      action: 'Menambahkan Data Penguapan',
       description: `${namaAdmin} Menambahkan data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
@@ -205,7 +205,7 @@ export class EvaporationService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah Data Evaporation',
+      action: 'Mengubah Data Penguapan',
       description: `${namaAdmin} mengubah nilai evaporation menjadi ${evaporation} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
@@ -213,7 +213,8 @@ export class EvaporationService {
     });
 
     return {
-      message: 'Data evaporation berhasil diubah',
+      success: true,
+      message: 'Data penguapan berhasil diubah',
       data: evaporation,
     };
   }
@@ -292,7 +293,7 @@ export class EvaporationService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus Data Evaporation',
+      action: 'Menghapus Data Penguapan',
       description: `${namaAdmin} menghapus data evaporation untuk tanggal ${tanggal}`,
       ip_address: ipAddress,
       user_agent: userAgent,

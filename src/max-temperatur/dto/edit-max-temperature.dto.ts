@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
 
-export class CreateMaxTemperatureDto {
+export class EditMaxTemperatureDto {
+  @ApiProperty({ description: 'ID tanggal', example: '1' })
+  @IsNotEmpty()
+  @IsNumber()
+  id_date: number;
+
   @ApiProperty({ description: 'ID admin atau operator', example: '1' })
   @IsNotEmpty()
   @IsString()
