@@ -7,6 +7,7 @@ import { AdminModule } from '@/admin/admin.module';
 import { LoginLogModule } from '@/login-log/login-log.module';
 import { EvaporationModule } from '@/evaporation/evaporation.module';
 import { ActivityLogModule } from '@/activity-log/activity-log.module';
+import { MaxTemperaturModule } from '@/max-temperatur/max-temperatur.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ActivityLogModule } from '@/activity-log/activity-log.module';
     LoginLogModule,
     AdminModule,
     EvaporationModule,
+    MaxTemperaturModule,
   ],
   controllers: [AppController],
   providers: [AppService],

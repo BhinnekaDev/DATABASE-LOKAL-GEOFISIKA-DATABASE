@@ -119,7 +119,7 @@ export class EvaporationService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Menambahkan Data Evaporation',
-      description: `${namaAdmin} Menambahkan data evaporation dengan nilai ${evaporation} untuk tanggal ${date}`,
+      description: `${namaAdmin} Menambahkan data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
