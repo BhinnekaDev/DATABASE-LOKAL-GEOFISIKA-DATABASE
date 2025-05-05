@@ -12,15 +12,17 @@ import {
 } from '@nestjs/common';
 
 import { MaxTemperatureService } from '@/max-temperature/max-temperature.service';
+import { MaxTemperatureQueryDto } from '@/max-temperature/dto/maxTemperatureQueryDto';
 import { EditMaxTemperatureDto } from '@/max-temperature/dto/edit-max-temperature.dto';
 import { CreateMaxTemperatureDto } from '@/max-temperature/dto/create-max-temperature.dto';
+import { GetMaxTemperatureQueryDto } from '@/max-temperature/dto/getMaxTemperatureQueryDto';
 
 @ApiTags('Max Temperature')
 @Controller('max-temperature')
 export class MaxTemperatureController {
   constructor(private readonly maxTemperatureService: MaxTemperatureService) {}
 
-  // Route untuk menambahkan data max temperatur
+  // Route untuk menambahkan data temperatur maksimal
   @Post('/insert')
   async saveMaxTemperature(
     @Req() req: Request,
@@ -41,12 +43,12 @@ export class MaxTemperatureController {
     return result;
   }
 
-  // Route untuk mengubah data max temperatur
+  // Route untuk mengubah data temperatur maksimal
   @Put(`/update`)
   async updateMaxTemperature(
     @Req() req: Request,
     @Body() dto: EditMaxTemperatureDto,
-    @Query() querys: { id: number; user_id: string },
+    @Query() querys: MaxTemperatureQueryDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
@@ -62,11 +64,12 @@ export class MaxTemperatureController {
     return result;
   }
 
-  // Route untuk menghapus data max temperatur
+  // Route untuk menghapus data temperatur maksimal
+  @ApiOkResponse({ description: 'Berhasil menghapus data temperatur maksimal' })
   @Delete(`/delete`)
   async deleteMaxTemperature(
     @Req() req: Request,
-    @Query() querys: { id: number; user_id: string },
+    @Query() querys: MaxTemperatureQueryDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
@@ -96,7 +99,7 @@ export class MaxTemperatureController {
     description: 'Berhasil mendapatkan data temperatur maksimal berdasarkan id',
   })
   @Get('/get')
-  async getMaxTemperatureById(@Query() querys: { id: number }) {
+  async getMaxTemperatureById(@Query() querys: GetMaxTemperatureQueryDto) {
     const result = await this.maxTemperatureService.getMaxTemperatureById(
       querys.id,
     );

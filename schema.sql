@@ -130,7 +130,8 @@ create table "public"."max_temperature" (
 
 create table "public"."min_temperature" (
     "id" integer not null default nextval('min_temperature_id_seq'::regclass),
-    "min_temperature" double precision
+    "min_temperature" double precision,
+    "date" date
 );
 
 

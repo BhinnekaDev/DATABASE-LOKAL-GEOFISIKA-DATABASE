@@ -13,7 +13,9 @@ import {
 
 import { EvaporationService } from '@/evaporation/evaporation.service';
 import { EditEvaporationDto } from '@/evaporation/dto/edit-evaporation.dto';
+import { EvaporationQueryDto } from '@/evaporation/dto/qevaporationQueryDto';
 import { CreateEvaporationDto } from '@/evaporation/dto/create-evaporation.dto';
+import { GetEvaporationQueryDto } from '@/evaporation/dto/getEvaporationQueryDto';
 
 @ApiTags('Evaporation')
 @Controller('evaporation')
@@ -44,7 +46,7 @@ export class EvaporationController {
   async updateEvaporation(
     @Req() req: Request,
     @Body() dto: EditEvaporationDto,
-    @Query() querys: { id: number; user_id: string },
+    @Query() querys: EvaporationQueryDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
@@ -61,10 +63,11 @@ export class EvaporationController {
   }
 
   // Route untuk menghapus data evaporation
+  @ApiOkResponse({ description: 'Berhasil menghapus data penguapan' })
   @Delete('/delete')
   async deleteEvaporation(
     @Req() req: Request,
-    @Query() querys: { id: number; user_id: string },
+    @Query() querys: EvaporationQueryDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
@@ -89,8 +92,8 @@ export class EvaporationController {
     description: 'Berhasil mendapatkan data penguapan berdasarkan id',
   })
   @Get('/get')
-  async getEvaporationById(@Query('id') id: number) {
-    const result = await this.evaporationService.getEvaporationById(id);
+  async getEvaporationById(@Query() querys: GetEvaporationQueryDto) {
+    const result = await this.evaporationService.getEvaporationById(querys.id);
     return result;
   }
 }
