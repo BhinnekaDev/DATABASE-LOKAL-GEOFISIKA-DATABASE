@@ -6,8 +6,6 @@ create sequence "public"."air_pressure_id_seq";
 
 create sequence "public"."average_temperature_id_seq";
 
-create sequence "public"."date_data_id_seq";
-
 create sequence "public"."document_id_seq";
 
 create sequence "public"."earthquake_id_seq";
@@ -61,7 +59,6 @@ create table "public"."admin" (
 
 create table "public"."air_pressure" (
     "id" integer not null default nextval('air_pressure_id_seq'::regclass),
-    "id_date" integer,
     "id_weather_data" integer,
     "air_pressure" double precision
 );
@@ -69,15 +66,8 @@ create table "public"."air_pressure" (
 
 create table "public"."average_temperature" (
     "id" integer not null default nextval('average_temperature_id_seq'::regclass),
-    "id_date" integer,
     "id_weather_data" integer,
     "avg_temperature" double precision
-);
-
-
-create table "public"."date_data" (
-    "id" integer not null default nextval('date_data_id_seq'::regclass),
-    "date" date
 );
 
 
@@ -105,14 +95,13 @@ create table "public"."earthquake" (
 
 create table "public"."evaporation" (
     "id" integer not null default nextval('evaporation_id_seq'::regclass),
-    "id_date" integer,
-    "evaporation" double precision
+    "evaporation" double precision,
+    "date" date
 );
 
 
 create table "public"."humidity" (
     "id" integer not null default nextval('humidity_id_seq'::regclass),
-    "id_date" integer,
     "id_weather_data" integer,
     "avg_humidity" double precision
 );
@@ -134,14 +123,13 @@ create table "public"."login_log" (
 
 create table "public"."max_temperature" (
     "id" integer not null default nextval('max_temperature_id_seq'::regclass),
-    "id_date" integer,
-    "max_temperature" double precision
+    "max_temperature" double precision,
+    "date" date
 );
 
 
 create table "public"."min_temperature" (
     "id" integer not null default nextval('min_temperature_id_seq'::regclass),
-    "id_date" integer,
     "min_temperature" double precision
 );
 
@@ -154,28 +142,24 @@ create table "public"."observer" (
 
 create table "public"."rain_intensity" (
     "id" integer not null default nextval('rain_intensity_id_seq'::regclass),
-    "id_date" integer,
     "name" text
 );
 
 
 create table "public"."rainfall" (
     "id" integer not null default nextval('rainfall_id_seq'::regclass),
-    "id_date" integer,
     "rainfall" double precision
 );
 
 
 create table "public"."rainy_days" (
     "id" integer not null default nextval('rainy_days_id_seq'::regclass),
-    "id_date" integer,
     "rainy_day" boolean
 );
 
 
 create table "public"."sunshine_duration" (
     "id" integer not null default nextval('sunshine_duration_id_seq'::regclass),
-    "id_date" integer,
     "sunshine_duration" double precision
 );
 
@@ -196,7 +180,6 @@ create table "public"."weather_data" (
 
 create table "public"."wind_direction_and_speed" (
     "id" integer not null default nextval('wind_direction_and_speed_id_seq'::regclass),
-    "id_date" integer,
     "max_wind_speed" double precision,
     "speed_direction" text,
     "max_wind_direction" text
@@ -208,8 +191,6 @@ alter sequence "public"."admin_id_seq" owned by "public"."admin"."id";
 alter sequence "public"."air_pressure_id_seq" owned by "public"."air_pressure"."id";
 
 alter sequence "public"."average_temperature_id_seq" owned by "public"."average_temperature"."id";
-
-alter sequence "public"."date_data_id_seq" owned by "public"."date_data"."id";
 
 alter sequence "public"."document_id_seq" owned by "public"."document"."id";
 
@@ -251,8 +232,6 @@ CREATE UNIQUE INDEX air_pressure_pkey ON public.air_pressure USING btree (id);
 
 CREATE UNIQUE INDEX average_temperature_pkey ON public.average_temperature USING btree (id);
 
-CREATE UNIQUE INDEX date_data_pkey ON public.date_data USING btree (id);
-
 CREATE UNIQUE INDEX document_pkey ON public.document USING btree (id);
 
 CREATE UNIQUE INDEX earthquake_pkey ON public.earthquake USING btree (id);
@@ -292,8 +271,6 @@ alter table "public"."admin" add constraint "admin_pkey" PRIMARY KEY using index
 alter table "public"."air_pressure" add constraint "air_pressure_pkey" PRIMARY KEY using index "air_pressure_pkey";
 
 alter table "public"."average_temperature" add constraint "average_temperature_pkey" PRIMARY KEY using index "average_temperature_pkey";
-
-alter table "public"."date_data" add constraint "date_data_pkey" PRIMARY KEY using index "date_data_pkey";
 
 alter table "public"."document" add constraint "document_pkey" PRIMARY KEY using index "document_pkey";
 
@@ -339,17 +316,9 @@ alter table "public"."admin" validate constraint "admin_user_id_fkey";
 
 alter table "public"."admin" add constraint "admin_user_id_unique" UNIQUE using index "admin_user_id_unique";
 
-alter table "public"."air_pressure" add constraint "air_pressure_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."air_pressure" validate constraint "air_pressure_id_date_fkey";
-
 alter table "public"."air_pressure" add constraint "air_pressure_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
 
 alter table "public"."air_pressure" validate constraint "air_pressure_id_weather_data_fkey";
-
-alter table "public"."average_temperature" add constraint "average_temperature_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."average_temperature" validate constraint "average_temperature_id_date_fkey";
 
 alter table "public"."average_temperature" add constraint "average_temperature_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
 
@@ -358,14 +327,6 @@ alter table "public"."average_temperature" validate constraint "average_temperat
 alter table "public"."earthquake" add constraint "earthquake_observer_id_fkey" FOREIGN KEY (observer_id) REFERENCES observer(id) ON DELETE SET NULL not valid;
 
 alter table "public"."earthquake" validate constraint "earthquake_observer_id_fkey";
-
-alter table "public"."evaporation" add constraint "evaporation_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."evaporation" validate constraint "evaporation_id_date_fkey";
-
-alter table "public"."humidity" add constraint "humidity_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."humidity" validate constraint "humidity_id_date_fkey";
 
 alter table "public"."humidity" add constraint "humidity_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
 
@@ -381,49 +342,11 @@ alter table "public"."login_log" validate constraint "login_log_admin_id_fkey";
 
 alter table "public"."login_log" add constraint "login_log_admin_id_key" UNIQUE using index "login_log_admin_id_key";
 
-alter table "public"."max_temperature" add constraint "max_temperature_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."max_temperature" validate constraint "max_temperature_id_date_fkey";
-
-alter table "public"."min_temperature" add constraint "min_temperature_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."min_temperature" validate constraint "min_temperature_id_date_fkey";
-
-alter table "public"."rain_intensity" add constraint "rain_intensity_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."rain_intensity" validate constraint "rain_intensity_id_date_fkey";
-
-alter table "public"."rainfall" add constraint "rainfall_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."rainfall" validate constraint "rainfall_id_date_fkey";
-
-alter table "public"."rainy_days" add constraint "rainy_days_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."rainy_days" validate constraint "rainy_days_id_date_fkey";
-
-alter table "public"."sunshine_duration" add constraint "sunshine_duration_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."sunshine_duration" validate constraint "sunshine_duration_id_date_fkey";
-
 alter table "public"."time_signature" add constraint "time_signature_document_id_fkey" FOREIGN KEY (document_id) REFERENCES document(id) ON DELETE CASCADE not valid;
 
 alter table "public"."time_signature" validate constraint "time_signature_document_id_fkey";
 
-alter table "public"."wind_direction_and_speed" add constraint "wind_direction_and_speed_id_date_fkey" FOREIGN KEY (id_date) REFERENCES date_data(id) ON DELETE CASCADE not valid;
-
-alter table "public"."wind_direction_and_speed" validate constraint "wind_direction_and_speed_id_date_fkey";
-
 set check_function_bodies = off;
-
-create or replace view "public"."admin_status" as  SELECT a.id,
-    a.photo,
-    a.first_name,
-    a.last_name,
-    u.last_sign_in_at AS last_login,
-    (u.last_sign_in_at > (now() - '3 mons'::interval)) AS is_active
-   FROM (admin a
-     JOIN auth.users u ON ((a.user_id = u.id)));
-
 
 CREATE OR REPLACE FUNCTION public.get_operator()
  RETURNS TABLE(id integer, photo text, first_name text, last_name text, last_login timestamp without time zone, role text, is_active boolean)
@@ -443,18 +366,6 @@ AS $function$
   where a.role = 'operator' and a.user_id = auth.uid();
 $function$
 ;
-
-create or replace view "public"."operator" as  SELECT a.id,
-    a.photo,
-    a.first_name,
-    a.last_name,
-    u.last_sign_in_at AS last_login,
-    a.role,
-    (u.last_sign_in_at > (now() - '3 mons'::interval)) AS is_active
-   FROM (admin a
-     JOIN auth.users u ON ((a.user_id = u.id)))
-  WHERE (a.role = 'operator'::admin_role);
-
 
 grant delete on table "public"."activity_log" to "anon";
 
@@ -623,48 +534,6 @@ grant trigger on table "public"."average_temperature" to "service_role";
 grant truncate on table "public"."average_temperature" to "service_role";
 
 grant update on table "public"."average_temperature" to "service_role";
-
-grant delete on table "public"."date_data" to "anon";
-
-grant insert on table "public"."date_data" to "anon";
-
-grant references on table "public"."date_data" to "anon";
-
-grant select on table "public"."date_data" to "anon";
-
-grant trigger on table "public"."date_data" to "anon";
-
-grant truncate on table "public"."date_data" to "anon";
-
-grant update on table "public"."date_data" to "anon";
-
-grant delete on table "public"."date_data" to "authenticated";
-
-grant insert on table "public"."date_data" to "authenticated";
-
-grant references on table "public"."date_data" to "authenticated";
-
-grant select on table "public"."date_data" to "authenticated";
-
-grant trigger on table "public"."date_data" to "authenticated";
-
-grant truncate on table "public"."date_data" to "authenticated";
-
-grant update on table "public"."date_data" to "authenticated";
-
-grant delete on table "public"."date_data" to "service_role";
-
-grant insert on table "public"."date_data" to "service_role";
-
-grant references on table "public"."date_data" to "service_role";
-
-grant select on table "public"."date_data" to "service_role";
-
-grant trigger on table "public"."date_data" to "service_role";
-
-grant truncate on table "public"."date_data" to "service_role";
-
-grant update on table "public"."date_data" to "service_role";
 
 grant delete on table "public"."document" to "anon";
 

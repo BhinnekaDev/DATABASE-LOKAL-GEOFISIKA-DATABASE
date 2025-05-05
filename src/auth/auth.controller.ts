@@ -4,7 +4,7 @@ import {
   Req,
   Post,
   Body,
-  Param,
+  Query,
   UsePipes,
   Controller,
   ValidationPipe,
@@ -21,7 +21,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   // Route untuk register
-  @Post('register/:id_role')
+  @Post('register')
   @UsePipes(new ValidationPipe({ transform: true }))
   @ApiOperation({ summary: 'Register Admin atau Operator' })
   @ApiResponse({
@@ -30,7 +30,7 @@ export class AuthController {
     type: SignUpResponse,
   })
   async register(
-    @Param('id_role') id_role: string,
+    @Query('id_role') id_role: string,
     @Body() registerDto: RegisterDto,
     @Req() req: Request,
   ) {

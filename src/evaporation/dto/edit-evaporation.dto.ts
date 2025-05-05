@@ -5,7 +5,7 @@ export class EditEvaporationDto {
   @ApiProperty({ description: 'ID tanggal', example: '1' })
   @IsNotEmpty()
   @IsNumber()
-  id_date: number;
+  id: number;
 
   @ApiProperty({ description: 'ID admin atau operator', example: '1' })
   @IsNotEmpty()

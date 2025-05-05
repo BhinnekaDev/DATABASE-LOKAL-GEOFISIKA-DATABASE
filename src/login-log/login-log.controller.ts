@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOkResponse, ApiExcludeEndpoint } from '@nestjs/swagger';
 
 import { LoginLogService } from '@/login-log/login-log.service';
@@ -18,7 +18,7 @@ export class LoginLogController {
 
   // Route untuk mendapatkan semua login log
   @ApiOkResponse({ description: 'Berhasil mendapatkan semua login log' })
-  @Get(`/get`)
+  @Get(`/get-all`)
   async getAllLog() {
     return await this.loginLogService.getAllLoginLog();
   }
@@ -27,8 +27,8 @@ export class LoginLogController {
   @ApiOkResponse({
     description: 'Berhasil mendapatkan login log berdasarkan user_id',
   })
-  @Get('/get/:user_id')
-  async getLogByUserId(@Param('user_id') user_id: string) {
+  @Get('/get')
+  async getLogByUserId(@Query('user_id') user_id: string) {
     return await this.loginLogService.getLoginLogByUserId(user_id);
   }
 }

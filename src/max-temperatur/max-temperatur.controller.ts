@@ -6,7 +6,7 @@ import {
   Put,
   Post,
   Body,
-  Param,
+  Query,
   Delete,
   Controller,
 } from '@nestjs/common';
@@ -16,22 +16,45 @@ import { EditMaxTemperatureDto } from '@/max-temperatur/dto/edit-max-temperature
 import { CreateMaxTemperatureDto } from '@/max-temperatur/dto/create-max-temperature.dto';
 
 @ApiTags('Max Temperatur')
-@Controller('max-temperatur')
+@Controller('max-temperature')
 export class MaxTemperaturController {
   constructor(private readonly maxTemperaturService: MaxTemperaturService) {}
 
   // Route untuk menambahkan data max temperatur
-  @Post(`/insert/:user_id`)
+  @Post('/insert')
   async saveMaxTemperature(
     @Req() req: Request,
-    @Param() param: CreateMaxTemperatureDto,
+    @Query('user_id') userId: string,
     @Body() dto: CreateMaxTemperatureDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
-    dto.user_id = param.user_id;
 
-    const result = this.maxTemperaturService.saveMaxTemperature(
+    dto.user_id = userId;
+
+    const result = await this.maxTemperaturService.saveMaxTemperature(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk mengubah data max temperatur
+  @Put(`/update`)
+  async updateMaxTemperature(
+    @Req() req: Request,
+    @Body() dto: EditMaxTemperatureDto,
+    @Query() querys: { id: number; user_id: string },
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = querys.user_id;
+    dto.id = querys.id;
+
+    const result = await this.maxTemperaturService.updateMaxTemperature(
       dto,
       ipAddress,
       userAgent,
@@ -39,23 +62,43 @@ export class MaxTemperaturController {
     return result;
   }
 
-  // Route untuk mengubah data max temperatur
-  @Put(`/update/:id_date/:user_id`)
-  async updateMaxTemperature(
+  // Route untuk menghapus data max temperatur
+  @Delete(`/delete`)
+  async deleteMaxTemperature(
     @Req() req: Request,
-    @Body() dto: EditMaxTemperatureDto,
-    @Param() param: { id_date: string; user_id: string },
+    @Query() querys: { id: number; user_id: string },
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 
-    dto.user_id = param.user_id;
-    dto.id_date = parseInt(param.id_date);
+    const result = await this.maxTemperaturService.deleteMaxTemperature(
+      querys.id,
+      querys.user_id,
 
-    const result = await this.maxTemperaturService.updateMaxTemperature(
-      dto,
       ipAddress,
       userAgent,
+    );
+    return result;
+  }
+
+  // Route untuk ambil semua data temperatur maksimal
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan semua data temperatur maksimal',
+  })
+  @Get('/get-all')
+  async getAllMaxTemperature() {
+    const result = await this.maxTemperaturService.getAllMaxTemperature();
+    return result;
+  }
+
+  // Route untuk ambil data temperatur maksimal berdasarkan id
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan data temperatur maksimal berdasarkan id',
+  })
+  @Get('/get')
+  async getMaxTemperatureById(@Query() querys: { id: number }) {
+    const result = await this.maxTemperaturService.getMaxTemperatureById(
+      querys.id,
     );
     return result;
   }

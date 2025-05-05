@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { ApiTags, ApiOkResponse } from '@nestjs/swagger';
-import { Controller, Delete, Param, Req, Put, Body, Get } from '@nestjs/common';
+import { Controller, Delete, Query, Req, Put, Body, Get } from '@nestjs/common';
 
 import { AdminService } from '@/admin/admin.service';
 import { DeleteAdminDto } from '@/admin/dto/delete-admin.dto';
@@ -12,9 +12,9 @@ export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
   // Route untuk update
-  @Put('edit/:user_id/:id_role')
+  @Put('edit')
   async updateAdmin(
-    @Param() params: UpdateAdminDto,
+    @Query() querys: UpdateAdminDto,
     @Body() updateAdminDto: UpdateAdminDto,
     @Req() req: Request,
   ) {
@@ -23,8 +23,8 @@ export class AdminController {
 
     const updatedAdminData = {
       ...updateAdminDto,
-      user_id: params.user_id,
-      id_role: params.id_role,
+      user_id: querys.user_id,
+      id_role: querys.id_role,
     };
 
     return this.adminService.updateAdmin(
@@ -34,16 +34,16 @@ export class AdminController {
     );
   }
   // Route untuk delete
-  @Delete('delete/:user_id/:id_role')
-  async deleteAdmin(@Param() params: DeleteAdminDto, @Req() req: Request) {
+  @Delete('delete')
+  async deleteAdmin(@Query() querys: DeleteAdminDto, @Req() req: Request) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 
-    return this.adminService.deleteAdmin(params, ipAddress, userAgent);
+    return this.adminService.deleteAdmin(querys, ipAddress, userAgent);
   }
 
   // Route untuk ambil data admin
-  @Get('get')
+  @Get('get-all')
   @ApiOkResponse({
     description: 'Berhasil mengambil data admin.',
   })
@@ -52,11 +52,11 @@ export class AdminController {
   }
 
   // Route untuk ambil data admin berdasarkan user_id
-  @Get('get/:user_id')
+  @Get('get')
   @ApiOkResponse({
     description: 'Berhasil mengambil data admin berdasarkan user id.',
   })
-  async getAdminDataByUserId(@Param('user_id') user_id: string) {
+  async getAdminDataByUserId(@Query('user_id') user_id: string) {
     return this.adminService.getAdminDataByUserId(user_id);
   }
 }

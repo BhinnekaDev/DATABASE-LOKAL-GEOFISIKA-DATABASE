@@ -54,32 +54,7 @@ export class EvaporationService {
   ) {
     const { user_id, date, evaporation } = dto;
 
-    // 1. Cari atau buat tanggal
-    let { data: tanggalData, error: tanggalError } = await this.supabase
-      .from('date_data')
-      .select('id')
-      .eq('date', date)
-      .single();
-
-    if (tanggalError || !tanggalData) {
-      const { data: insertedDate, error: insertDateError } = await this.supabase
-        .from('date_data')
-        .insert({ date })
-        .select('id')
-        .single();
-
-      if (insertDateError || !insertedDate) {
-        return {
-          success: false,
-          message: 'Gagal menyimpan atau mendapatkan tanggal dari date_data',
-          error: insertDateError,
-        };
-      }
-
-      tanggalData = insertedDate;
-    }
-
-    // 2. Ambil data admin
+    // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
     if (!adminResponse.success || !adminResponse.data) {
       return {
@@ -92,12 +67,12 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 3. Simpan data evaporation dengan select()
+    // 2. Simpan data evaporation dengan select()
     const { data: insertedEvaporation, error: evaporationError } =
       await this.supabase
         .from('evaporation')
         .insert({
-          id_date: tanggalData.id,
+          date,
           evaporation,
         })
         .select()
@@ -111,7 +86,7 @@ export class EvaporationService {
       };
     }
 
-    // 4. Catat ke activity log
+    // 3. Catat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
@@ -140,24 +115,9 @@ export class EvaporationService {
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id_date, user_id, date, evaporation } = dto;
+    const { id, user_id, date, evaporation } = dto;
 
-    // 1. Cek apakah tanggal ada di tabel date_data
-    const { data: tanggalData, error: tanggalError } = await this.supabase
-      .from('date_data')
-      .select('id')
-      .eq('id', id_date)
-      .single();
-
-    if (tanggalError || !tanggalData) {
-      return {
-        success: false,
-        message: 'Tanggal dengan id_date tersebut tidak ditemukan',
-        error: tanggalError,
-      };
-    }
-
-    // 2. Ambil data admin
+    // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
     if (!adminResponse.success || !adminResponse.data) {
       return {
@@ -170,11 +130,14 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 3. Update data evaporation berdasarkan id_date
-    const { error: evaporationError } = await this.supabase
-      .from('evaporation')
-      .update({ evaporation })
-      .eq('id_date', id_date);
+    // 2. Update data evaporation berdasarkan id
+    const { data: updatedEvaporation, error: evaporationError } =
+      await this.supabase
+        .from('evaporation')
+        .update({ evaporation, date })
+        .eq('id', id)
+        .select()
+        .single();
 
     if (evaporationError) {
       return {
@@ -184,21 +147,7 @@ export class EvaporationService {
       };
     }
 
-    // 4. Update tanggal
-    const { error: updateDateError } = await this.supabase
-      .from('date_data')
-      .update({ date })
-      .eq('id', id_date);
-
-    if (updateDateError) {
-      return {
-        success: false,
-        message: 'Gagal mengubah tanggal di date_data',
-        error: updateDateError,
-      };
-    }
-
-    // 5. Catat ke activity log
+    // 3. Catat ke activity log
     const updatedAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
@@ -206,7 +155,7 @@ export class EvaporationService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Mengubah Data Penguapan',
-      description: `${namaAdmin} mengubah nilai evaporation menjadi ${evaporation} untuk tanggal ${date}`,
+      description: `${namaAdmin} mengubah nilai penguapan menjadi ${evaporation} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: updatedAt,
@@ -215,15 +164,15 @@ export class EvaporationService {
     return {
       success: true,
       message: 'Data penguapan berhasil diubah',
-      data: evaporation,
+      data: updatedEvaporation,
     };
   }
 
   /**
-   * Menghapus data evaporation dan tanggal terkait, lalu mencatat ke activity log
+   * Menghapus data evaporation, lalu mencatat ke activity log
    */
   async deleteEvaporation(
-    id_date: number,
+    id: number,
     user_id: string,
     ipAddress: string,
     userAgent: string,
@@ -241,28 +190,29 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil tanggal sebelum menghapus (untuk log)
-    const { data: tanggalData, error: tanggalError } = await this.supabase
-      .from('date_data')
-      .select('date')
-      .eq('id', id_date)
-      .single();
+    // 3. Ambil data evaporation (untuk log)
+    const { data: evaporationData, error: getEvaporationError } =
+      await this.supabase
+        .from('evaporation')
+        .select('id, evaporation, date')
+        .eq('id', id)
+        .single();
 
-    if (tanggalError || !tanggalData) {
+    if (getEvaporationError || !evaporationData) {
       return {
         success: false,
-        message: 'Tanggal tidak ditemukan di date_data',
-        error: tanggalError,
+        message: 'Data evaporation tidak ditemukan',
+        error: getEvaporationError,
       };
     }
 
-    const tanggal = tanggalData.date;
+    const { date, evaporation } = evaporationData;
 
     // 3. Hapus data evaporation
     const { error: evaporationError } = await this.supabase
       .from('evaporation')
       .delete()
-      .eq('id_date', id_date);
+      .eq('id', id);
 
     if (evaporationError) {
       return {
@@ -272,21 +222,7 @@ export class EvaporationService {
       };
     }
 
-    // 4. Hapus data date_data
-    const { error: dateDeleteError } = await this.supabase
-      .from('date_data')
-      .delete()
-      .eq('id', id_date);
-
-    if (dateDeleteError) {
-      return {
-        success: false,
-        message: 'Gagal menghapus data tanggal dari date_data',
-        error: dateDeleteError,
-      };
-    }
-
-    // 5. Catat ke activity log
+    // 4. Catat ke activity log
     const deletedAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
@@ -294,7 +230,7 @@ export class EvaporationService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Menghapus Data Penguapan',
-      description: `${namaAdmin} menghapus data evaporation untuk tanggal ${tanggal}`,
+      description: `${namaAdmin} menghapus data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: deletedAt,
@@ -303,6 +239,7 @@ export class EvaporationService {
     return {
       success: true,
       message: 'Data evaporation dan tanggal berhasil dihapus',
+      data: evaporationData,
     };
   }
 
@@ -313,10 +250,7 @@ export class EvaporationService {
     const { data, error } = await this.supabase.from('evaporation').select(`
         id,
         evaporation,
-        id_date,
-        date_data (
-          date
-        )
+        date
       `);
 
     if (error || !data) {
@@ -344,10 +278,7 @@ export class EvaporationService {
         `
         id,
         evaporation,
-        id_date,
-        date_data (
-          date
-        )
+        date
       `,
       )
       .eq('id', id)

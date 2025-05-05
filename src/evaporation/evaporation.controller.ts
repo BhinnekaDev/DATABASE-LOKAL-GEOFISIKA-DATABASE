@@ -6,7 +6,7 @@ import {
   Put,
   Post,
   Body,
-  Param,
+  Query,
   Delete,
   Controller,
 } from '@nestjs/common';
@@ -21,15 +21,15 @@ export class EvaporationController {
   constructor(private readonly evaporationService: EvaporationService) {}
 
   // Route untuk menyimpan data evaporation
-  @Post('/insert/:user_id')
+  @Post('/insert')
   async saveEvaporation(
     @Req() req: Request,
-    @Param() param: CreateEvaporationDto,
+    @Query('user_id') userId: string,
     @Body() dto: CreateEvaporationDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
-    dto.user_id = param.user_id;
+    dto.user_id = userId;
 
     const result = await this.evaporationService.saveEvaporation(
       dto,
@@ -40,17 +40,17 @@ export class EvaporationController {
   }
 
   // Route untuk mengubah data evaporation
-  @Put('/update/:id_date/:user_id')
+  @Put('/update')
   async updateEvaporation(
     @Req() req: Request,
     @Body() dto: EditEvaporationDto,
-    @Param() param: { id_date: string; user_id: string },
+    @Query() querys: { id: number; user_id: string },
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 
-    dto.user_id = param.user_id;
-    dto.id_date = parseInt(param.id_date);
+    dto.user_id = querys.user_id;
+    dto.id = querys.id;
 
     const result = await this.evaporationService.updateEvaporation(
       dto,
@@ -61,37 +61,36 @@ export class EvaporationController {
   }
 
   // Route untuk menghapus data evaporation
-  @Delete('/delete/:id_date/:user_id')
+  @Delete('/delete')
   async deleteEvaporation(
     @Req() req: Request,
-    @Param('id_date') id_date: string,
-    @Param('user_id') user_id: string,
+    @Query() querys: { id: number; user_id: string },
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 
     return await this.evaporationService.deleteEvaporation(
-      parseInt(id_date),
-      user_id,
+      querys.id,
+      querys.user_id,
       ipAddress,
       userAgent,
     );
   }
 
   //   Route untuk ambil semua data evaporation
-  @ApiOkResponse({ description: 'Berhasil mendapatkan data' })
-  @Get('/get')
+  @ApiOkResponse({ description: 'Berhasil mendapatkan semua data penguapan' })
+  @Get('/get-all')
   async getAllEvaporation() {
     return await this.evaporationService.getAllEvaporation();
   }
 
   // Route untuk ambil semua data evaporation berdasarkan id
-  @ApiOkResponse({ description: 'Berhasil mendapatkan data berdasarkan id' })
-  @Get('/get/:id')
-  async getEvaporationById(@Param('id') id: string) {
-    const result = await this.evaporationService.getEvaporationById(
-      parseInt(id),
-    );
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan data penguapan berdasarkan id',
+  })
+  @Get('/get')
+  async getEvaporationById(@Query('id') id: number) {
+    const result = await this.evaporationService.getEvaporationById(id);
     return result;
   }
 }
