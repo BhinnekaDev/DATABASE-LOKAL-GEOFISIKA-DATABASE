@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import { ActivityLogService } from '@/activity-log/activity-log.service';
-import { EditMaxTemperatureDto } from '@/max-temperatur/dto/edit-max-temperature.dto';
-import { CreateMaxTemperatureDto } from '@/max-temperatur/dto/create-max-temperature.dto';
+import { EditMaxTemperatureDto } from '@/max-temperature/dto/edit-max-temperature.dto';
+import { CreateMaxTemperatureDto } from '@/max-temperature/dto/create-max-temperature.dto';
 
 dotenv.config();
 
 @Injectable()
-export class MaxTemperaturService {
+export class MaxTemperatureService {
   private supabase: SupabaseClient;
 
   constructor(

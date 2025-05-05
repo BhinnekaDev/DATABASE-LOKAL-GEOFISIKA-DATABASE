@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { MaxTemperaturController } from '@/max-temperatur/max-temperatur.controller';
+import { MaxTemperatureController } from '@/max-temperature/max-temperature.controller';
 
 describe('MaxTemperaturController', () => {
-  let controller: MaxTemperaturController;
+  let controller: MaxTemperatureController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MaxTemperaturController],
+      controllers: [MaxTemperatureController],
     }).compile();
 
-    controller = module.get<MaxTemperaturController>(MaxTemperaturController);
+    controller = module.get<MaxTemperatureController>(MaxTemperatureController);
   });
 
   it('should be defined', () => {

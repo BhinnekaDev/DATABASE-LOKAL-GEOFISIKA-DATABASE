@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
-import { MaxTemperaturService } from '@/max-temperatur/max-temperatur.service';
+import { MaxTemperatureService } from '@/max-temperature/max-temperature.service';
 
 describe('MaxTemperaturService', () => {
-  let service: MaxTemperaturService;
+  let service: MaxTemperatureService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [MaxTemperaturService],
+      providers: [MaxTemperatureService],
     }).compile();
 
-    service = module.get<MaxTemperaturService>(MaxTemperaturService);
+    service = module.get<MaxTemperatureService>(MaxTemperatureService);
   });
 
   it('should be defined', () => {

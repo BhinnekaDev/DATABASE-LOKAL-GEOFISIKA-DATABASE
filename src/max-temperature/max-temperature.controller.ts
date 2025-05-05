@@ -11,14 +11,14 @@ import {
   Controller,
 } from '@nestjs/common';
 
-import { MaxTemperaturService } from '@/max-temperatur/max-temperatur.service';
-import { EditMaxTemperatureDto } from '@/max-temperatur/dto/edit-max-temperature.dto';
-import { CreateMaxTemperatureDto } from '@/max-temperatur/dto/create-max-temperature.dto';
+import { MaxTemperatureService } from '@/max-temperature/max-temperature.service';
+import { EditMaxTemperatureDto } from '@/max-temperature/dto/edit-max-temperature.dto';
+import { CreateMaxTemperatureDto } from '@/max-temperature/dto/create-max-temperature.dto';
 
-@ApiTags('Max Temperatur')
+@ApiTags('Max Temperature')
 @Controller('max-temperature')
-export class MaxTemperaturController {
-  constructor(private readonly maxTemperaturService: MaxTemperaturService) {}
+export class MaxTemperatureController {
+  constructor(private readonly maxTemperatureService: MaxTemperatureService) {}
 
   // Route untuk menambahkan data max temperatur
   @Post('/insert')
@@ -32,7 +32,7 @@ export class MaxTemperaturController {
 
     dto.user_id = userId;
 
-    const result = await this.maxTemperaturService.saveMaxTemperature(
+    const result = await this.maxTemperatureService.saveMaxTemperature(
       dto,
       ipAddress,
       userAgent,
@@ -54,7 +54,7 @@ export class MaxTemperaturController {
     dto.user_id = querys.user_id;
     dto.id = querys.id;
 
-    const result = await this.maxTemperaturService.updateMaxTemperature(
+    const result = await this.maxTemperatureService.updateMaxTemperature(
       dto,
       ipAddress,
       userAgent,
@@ -71,7 +71,7 @@ export class MaxTemperaturController {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 
-    const result = await this.maxTemperaturService.deleteMaxTemperature(
+    const result = await this.maxTemperatureService.deleteMaxTemperature(
       querys.id,
       querys.user_id,
 
@@ -87,7 +87,7 @@ export class MaxTemperaturController {
   })
   @Get('/get-all')
   async getAllMaxTemperature() {
-    const result = await this.maxTemperaturService.getAllMaxTemperature();
+    const result = await this.maxTemperatureService.getAllMaxTemperature();
     return result;
   }
 
@@ -97,7 +97,7 @@ export class MaxTemperaturController {
   })
   @Get('/get')
   async getMaxTemperatureById(@Query() querys: { id: number }) {
-    const result = await this.maxTemperaturService.getMaxTemperatureById(
+    const result = await this.maxTemperatureService.getMaxTemperatureById(
       querys.id,
     );
     return result;
