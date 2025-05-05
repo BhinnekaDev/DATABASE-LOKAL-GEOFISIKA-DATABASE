@@ -250,11 +250,9 @@ export class MaxTemperatureService {
    * Mengambil semua data temperatur maksimal
    */
   async getAllMaxTemperature() {
-    const { data, error } = await this.supabase.from('max_temperature').select(`
-        id,
-        max_temperature,
-        date
-      `);
+    const { data, error } = await this.supabase
+      .from('max_temperature')
+      .select('*');
 
     if (error || !data) {
       return {
@@ -277,13 +275,7 @@ export class MaxTemperatureService {
   async getMaxTemperatureById(id: number) {
     const { data, error } = await this.supabase
       .from('max_temperature')
-      .select(
-        `
-        id,
-        max_temperature,
-        date
-      `,
-      )
+      .select(`*`)
       .eq('id', id)
       .single();
 

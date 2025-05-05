@@ -155,7 +155,8 @@ create table "public"."rainfall" (
 
 create table "public"."rainy_days" (
     "id" integer not null default nextval('rainy_days_id_seq'::regclass),
-    "rainy_day" boolean
+    "rainy_day" text,
+    "date" date
 );
 
 

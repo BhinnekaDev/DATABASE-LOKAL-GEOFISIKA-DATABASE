@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+import { EditRainyDaysDto } from '@/rainy-days/dto/edit-rainy-days.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
-import { EditEvaporationDto } from '@/evaporation/dto/edit-evaporation.dto';
-import { CreateEvaporationDto } from '@/evaporation/dto/create-evaporation.dto';
+import { CreateRainyDaysDto } from '@/rainy-days/dto/create-rainy-days.dto';
 
 dotenv.config();
 
 @Injectable()
-export class EvaporationService {
+export class RainyDaysService {
   private supabase: SupabaseClient;
 
   constructor(
@@ -45,14 +45,14 @@ export class EvaporationService {
   }
 
   /**
-   * Menyimpan data evaporation dan mencatat ke activity log
+   * Menyimpan data hari hujan dan mencatat ke activity log
    */
-  async saveEvaporation(
-    dto: CreateEvaporationDto,
+  async saveRainyDays(
+    dto: CreateRainyDaysDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, date, evaporation } = dto;
+    const { user_id, date, rainy_day } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -67,22 +67,18 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Simpan data evaporation dengan select()
-    const { data: insertedEvaporation, error: evaporationError } =
+    // 2. Simpan data hari hujan
+    const { data: insertedRainyDays, error: rainyDaysError } =
       await this.supabase
-        .from('evaporation')
-        .insert({
-          date,
-          evaporation,
-        })
-        .select()
-        .single();
+        .from('rainy_days')
+        .insert({ date, rainy_day })
+        .select();
 
-    if (evaporationError) {
+    if (rainyDaysError) {
       return {
         success: false,
-        message: 'Gagal menyimpan data evaporation',
-        error: evaporationError,
+        message: 'Gagal menyimpan data hari hujan',
+        error: rainyDaysError,
       };
     }
 
@@ -93,8 +89,8 @@ export class EvaporationService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Penguapan',
-      description: `${namaAdmin} Menambahkan data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
+      action: 'Menambahkan data temperatur minimal',
+      description: `${namaAdmin} Mengubah data temperatur minimal dengan nilai ${rainy_day} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -102,20 +98,20 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Data evaporation berhasil disimpan',
-      data: insertedEvaporation,
+      message: 'Berhasil menyimpan data hari hujan',
+      data: insertedRainyDays,
     };
   }
 
   /**
-   * Mengubah data evaporation dan mencatat ke activity log
+   * Mengubah data hari hujan dan mencatat ke activity log
    */
-  async updateEvaporation(
-    dto: EditEvaporationDto,
+  async updateRainyDays(
+    dto: EditRainyDaysDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id, user_id, date, evaporation } = dto;
+    const { id, user_id, date, rainy_day } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -130,48 +126,47 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Update data evaporation berdasarkan id
-    const { data: updatedEvaporation, error: evaporationError } =
+    // 2. Update data hari hujan berdasarkan id
+    const { data: updatedRainyDays, error: rainyDaysError } =
       await this.supabase
-        .from('evaporation')
-        .update({ evaporation, date })
+        .from('rainy_days')
+        .update({ rainy_day, date })
         .eq('id', id)
-        .select()
-        .single();
+        .select();
 
-    if (evaporationError) {
+    if (rainyDaysError) {
       return {
         success: false,
-        message: 'Gagal mengubah data evaporation',
-        error: evaporationError,
+        message: 'Gagal mengubah data hari hujan',
+        error: rainyDaysError,
       };
     }
 
     // 3. Catat ke activity log
-    const updatedAt = new Date().toLocaleString('en-US', {
+    const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah Data Penguapan',
-      description: `${namaAdmin} mengubah nilai penguapan menjadi ${evaporation} untuk tanggal ${date}`,
+      action: 'Mengubah data hari hujan',
+      description: `${namaAdmin} Mengubah data hari hujan dengan nilai ${rainy_day} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
-      created_at: updatedAt,
+      created_at: createdAt,
     });
 
     return {
       success: true,
-      message: 'Data penguapan berhasil diubah',
-      data: updatedEvaporation,
+      message: 'Berhasil mengubah data hari hujan',
+      data: updatedRainyDays,
     };
   }
 
   /**
-   * Menghapus data evaporation, lalu mencatat ke activity log
+   * Menghapus data hari hujan dan mencatat ke activity log
    */
-  async deleteEvaporation(
+  async deleteRainyDays(
     id: number,
     user_id: string,
     ipAddress: string,
@@ -190,86 +185,67 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 3. Ambil data evaporation (untuk log)
-    const { data: evaporationData, error: getEvaporationError } =
-      await this.supabase
-        .from('evaporation')
-        .select('id, evaporation, date')
-        .eq('id', id)
-        .single();
-
-    if (getEvaporationError || !evaporationData) {
-      return {
-        success: false,
-        message: 'Data evaporation tidak ditemukan',
-        error: getEvaporationError,
-      };
-    }
-
-    const { date, evaporation } = evaporationData;
-
-    // 3. Hapus data evaporation
-    const { error: evaporationError } = await this.supabase
-      .from('evaporation')
+    // 2. Hapus data hari hujan berdasarkan id
+    const { error: rainyDaysError } = await this.supabase
+      .from('rainy_days')
       .delete()
       .eq('id', id);
 
-    if (evaporationError) {
+    if (rainyDaysError) {
       return {
         success: false,
-        message: 'Gagal menghapus data evaporation',
-        error: evaporationError,
+        message: 'Gagal menghapus data hari hujan',
+        error: rainyDaysError,
       };
     }
 
-    // 4. Catat ke activity log
-    const deletedAt = new Date().toLocaleString('en-US', {
+    // 3. Catat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus Data Penguapan',
-      description: `${namaAdmin} menghapus data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
+      action: 'Menghapus data hari hujan',
+      description: `${namaAdmin} Menghapus data hari hujan dengan id ${id}`,
       ip_address: ipAddress,
       user_agent: userAgent,
-      created_at: deletedAt,
+      created_at: createdAt,
     });
 
     return {
       success: true,
-      message: 'Data evaporation dan tanggal berhasil dihapus',
-      data: evaporationData,
+      message: 'Berhasil menghapus data hari hujan',
     };
   }
 
   /**
-   * Mengambil semua data evaporation
+   * Mengambil semua data hari hujan
    */
-  async getAllEvaporation() {
-    const { data, error } = await this.supabase.from('evaporation').select(`*`);
+  async getAllRainyDays() {
+    const { data, error } = await this.supabase.from('rainy_days').select('*');
 
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data evaporation',
+        message: 'Gagal mengambil semua data hari hujan',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil semua data evaporation',
+      message: 'Berhasil mengambil semua data hari hujan',
       data: data,
     };
   }
 
   /**
-   * Mengambil semua data evaporation berdasarkan id
+   * Mengambil semua data temperatur minimal berdasarkan id
    */
-  async getEvaporationById(id: number) {
+  async getRainyDaysById(id: number) {
     const { data, error } = await this.supabase
-      .from('evaporation')
+      .from('rainy_days')
       .select('*')
       .eq('id', id)
       .single();
@@ -277,14 +253,14 @@ export class EvaporationService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data evaporation berdasarkan id',
+        message: 'Gagal mengambil data hari hujan berdasarkan id',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data evaporation berdasarkan id',
+      message: 'Berhasil mengambil data hari hujan berdasarkan id',
       data,
     };
   }

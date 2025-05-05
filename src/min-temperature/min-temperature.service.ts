@@ -223,11 +223,9 @@ export class MinTemperatureService {
    * Mengambil semua data temperatur minimal
    */
   async getAllMinTemperature() {
-    const { data, error } = await this.supabase.from('min_temperature').select(`
-      id,
-      min_temperature,
-      date
-    `);
+    const { data, error } = await this.supabase
+      .from('min_temperature')
+      .select('*');
 
     if (error || !data) {
       return {
@@ -250,13 +248,7 @@ export class MinTemperatureService {
   async getMinTemperatureById(id: number) {
     const { data, error } = await this.supabase
       .from('min_temperature')
-      .select(
-        `
-      id,
-      min_temperature,
-      date
-    `,
-      )
+      .select('*')
       .eq('id', id)
       .single();
 
