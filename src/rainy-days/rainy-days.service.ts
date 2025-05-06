@@ -89,8 +89,8 @@ export class RainyDaysService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan data temperatur minimal',
-      description: `${namaAdmin} Mengubah data temperatur minimal dengan nilai ${rainy_day} untuk tanggal ${date}`,
+      action: 'Menambahkan Data Hari Hujan',
+      description: `${namaAdmin} menambahkan data hari hujan dengan nilai ${rainy_day} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -149,8 +149,8 @@ export class RainyDaysService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah data hari hujan',
-      description: `${namaAdmin} Mengubah data hari hujan dengan nilai ${rainy_day} untuk tanggal ${date}`,
+      action: 'Mengubah Data Hari Hujan',
+      description: `${namaAdmin} mengubah data hari hujan dengan nilai ${rainy_day} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -158,7 +158,7 @@ export class RainyDaysService {
 
     return {
       success: true,
-      message: 'Berhasil mengubah data hari hujan',
+      message: 'Berhasil memperbarui data hari hujan',
       data: updatedRainyDays,
     };
   }
@@ -185,7 +185,21 @@ export class RainyDaysService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Hapus data hari hujan berdasarkan id
+    // 2. Ambil data hari hujan (untuk log)
+    const { data: rainyDaysData, error: getRainyDaysError } =
+      await this.supabase.from('rainy_days').select('*').eq('id', id).single();
+
+    if (getRainyDaysError) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data hari hujan',
+        error: getRainyDaysError,
+      };
+    }
+
+    const { rainy_day, date } = rainyDaysData;
+
+    // 3. Hapus data hari hujan berdasarkan id
     const { error: rainyDaysError } = await this.supabase
       .from('rainy_days')
       .delete()
@@ -199,15 +213,15 @@ export class RainyDaysService {
       };
     }
 
-    // 3. Catat ke activity log
+    // 4. Catat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus data hari hujan',
-      description: `${namaAdmin} Menghapus data hari hujan dengan id ${id}`,
+      action: 'Menghapus Data Hari Hujan',
+      description: `${namaAdmin} menghapus data hari hujan dengan nilai ${rainy_day} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -216,6 +230,7 @@ export class RainyDaysService {
     return {
       success: true,
       message: 'Berhasil menghapus data hari hujan',
+      data: rainyDaysData,
     };
   }
 

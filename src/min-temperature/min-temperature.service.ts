@@ -45,7 +45,7 @@ export class MinTemperatureService {
   }
 
   /**
-   * Menyimpan data min temperatur dan mencatat ke activity log
+   * Menyimpan data temperatur minimal dan mencatat ke activity log
    */
   async saveMinTemperature(
     dto: CreateMinTemperatureDto,
@@ -77,7 +77,7 @@ export class MinTemperatureService {
     if (minTemperatureError) {
       return {
         success: false,
-        message: 'Gagal menyimpan data min temperatur',
+        message: 'Gagal menyimpan data temperatur minimal',
         error: minTemperatureError,
       };
     }
@@ -89,8 +89,8 @@ export class MinTemperatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan data temperatur minimal',
-      description: `${namaAdmin} Mengubah data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
+      action: 'Menambahkan Data Temperatur Minimal',
+      description: `${namaAdmin} menambahkan data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -98,13 +98,13 @@ export class MinTemperatureService {
 
     return {
       success: true,
-      message: 'Berhasil menyimpan data minimal temperatur',
+      message: 'Berhasil menyimpan data temperatur minimal',
       data: insertedMinTemperature,
     };
   }
 
   /**
-   * Mengubah data min temperatur dan mencatat ke activity log
+   * Mengubah data temperatur minimal dan mencatat ke activity log
    */
   async updateMinTemperature(
     dto: EditMinTemperatureDto,
@@ -137,7 +137,7 @@ export class MinTemperatureService {
     if (minTemperatureError) {
       return {
         success: false,
-        message: 'Gagal mengubah data min temperatur',
+        message: 'Gagal mengubah data temperatur minimal',
         error: minTemperatureError,
       };
     }
@@ -149,8 +149,8 @@ export class MinTemperatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah data temperatur minimal',
-      description: `${namaAdmin} Mengubah data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
+      action: 'Mengubah Data Temperatur Minimal',
+      description: `${namaAdmin} mengubah data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -158,13 +158,13 @@ export class MinTemperatureService {
 
     return {
       success: true,
-      message: 'Berhasil mengubah data min temperatur',
+      message: 'Berhasil mengubah data temperatur minimal',
       data: updatedMinTemperature,
     };
   }
 
   /**
-   * Menghapus data min temperatur dan mencatat ke activity log
+   * Menghapus data temperatur minimal dan mencatat ke activity log
    */
   async deleteMinTemperature(
     id: number,
@@ -185,7 +185,25 @@ export class MinTemperatureService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Hapus data min temperatur berdasarkan id
+    // 2. Ambil data temperatur minimal (untuk log)
+    const { data: minTemperatureData, error: getMintemperatureError } =
+      await this.supabase
+        .from('min_temperature')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (getMintemperatureError) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data temperatur minimal',
+        error: getMintemperatureError,
+      };
+    }
+
+    const { min_temperature, date } = minTemperatureData;
+
+    // 3. Hapus data min temperatur berdasarkan id
     const { error: minTemperatureError } = await this.supabase
       .from('min_temperature')
       .delete()
@@ -194,20 +212,20 @@ export class MinTemperatureService {
     if (minTemperatureError) {
       return {
         success: false,
-        message: 'Gagal menghapus data min temperatur',
+        message: 'Gagal menghapus data temperatur minimal',
         error: minTemperatureError,
       };
     }
 
-    // 3. Mencatat ke activity log
+    // 4. Mencatat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus data temperatur minimal',
-      description: `${namaAdmin} Menghapus data temperatur minimal dengan id ${id}`,
+      action: 'Menghapus Data Temperatur Minimal',
+      description: `${namaAdmin} menghapus data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -215,7 +233,8 @@ export class MinTemperatureService {
 
     return {
       success: true,
-      message: 'Berhasil menghapus data min temperatur',
+      message: 'Berhasil menghapus data temperatur minimal',
+      data: minTemperatureData,
     };
   }
 

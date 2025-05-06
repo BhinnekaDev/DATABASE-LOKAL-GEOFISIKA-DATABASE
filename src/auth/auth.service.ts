@@ -119,7 +119,7 @@ export class AuthService {
 
     await this.activityLogService.logActivity({
       admin_id: id_role,
-      action: 'Daftar',
+      action: 'Mendaftarkan Admin Atau Operator', 
       description: `${firstNameFromDB} ${lastNameFromDB} Mendaftarkan ${first_name} ${last_name} dengan email ${email}`,
       ip_address,
       user_agent,

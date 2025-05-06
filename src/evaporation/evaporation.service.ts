@@ -45,7 +45,7 @@ export class EvaporationService {
   }
 
   /**
-   * Menyimpan data evaporation dan mencatat ke activity log
+   * Menyimpan data penguapan dan mencatat ke activity log
    */
   async saveEvaporation(
     dto: CreateEvaporationDto,
@@ -81,7 +81,7 @@ export class EvaporationService {
     if (evaporationError) {
       return {
         success: false,
-        message: 'Gagal menyimpan data evaporation',
+        message: 'Gagal menyimpan data penguapan',
         error: evaporationError,
       };
     }
@@ -94,7 +94,7 @@ export class EvaporationService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Menambahkan Data Penguapan',
-      description: `${namaAdmin} Menambahkan data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
+      description: `${namaAdmin} menambahkan data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -102,13 +102,13 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Data evaporation berhasil disimpan',
+      message: 'Berhasil menyimpan data penguapan',
       data: insertedEvaporation,
     };
   }
 
   /**
-   * Mengubah data evaporation dan mencatat ke activity log
+   * Mengubah data penguapan dan mencatat ke activity log
    */
   async updateEvaporation(
     dto: EditEvaporationDto,
@@ -142,7 +142,7 @@ export class EvaporationService {
     if (evaporationError) {
       return {
         success: false,
-        message: 'Gagal mengubah data evaporation',
+        message: 'Gagal mengubah data penguapan',
         error: evaporationError,
       };
     }
@@ -163,13 +163,13 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Data penguapan berhasil diubah',
+      message: 'Berhasil memperbarui data penguapan',
       data: updatedEvaporation,
     };
   }
 
   /**
-   * Menghapus data evaporation, lalu mencatat ke activity log
+   * Menghapus data penguapan, lalu mencatat ke activity log
    */
   async deleteEvaporation(
     id: number,
@@ -190,13 +190,9 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 3. Ambil data evaporation (untuk log)
+    // 2. Ambil data penguapan (untuk log)
     const { data: evaporationData, error: getEvaporationError } =
-      await this.supabase
-        .from('evaporation')
-        .select('id, evaporation, date')
-        .eq('id', id)
-        .single();
+      await this.supabase.from('evaporation').select('*').eq('id', id).single();
 
     if (getEvaporationError || !evaporationData) {
       return {
@@ -217,7 +213,7 @@ export class EvaporationService {
     if (evaporationError) {
       return {
         success: false,
-        message: 'Gagal menghapus data evaporation',
+        message: 'Gagal menghapus data penguapan',
         error: evaporationError,
       };
     }
@@ -238,7 +234,7 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Data evaporation dan tanggal berhasil dihapus',
+      message: 'Berhasil menghapus data penguapan',
       data: evaporationData,
     };
   }
@@ -252,7 +248,7 @@ export class EvaporationService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data evaporation',
+        message: 'Gagal mengambil data penguapan',
         error,
       };
     }
@@ -277,14 +273,14 @@ export class EvaporationService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data evaporation berdasarkan id',
+        message: 'Gagal mengambil data penguapan berdasarkan id',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data evaporation berdasarkan id',
+      message: 'Berhasil mengambil data penguapan berdasarkan id',
       data,
     };
   }

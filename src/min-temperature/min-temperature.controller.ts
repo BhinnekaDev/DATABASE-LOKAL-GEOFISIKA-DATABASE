@@ -24,7 +24,7 @@ export class MinTemperatureController {
 
   // Route untuk menambah data temperatur minimal
   @Post('/insert')
-  async saveMaxTemperature(
+  async saveMinTemperature(
     @Req() req: Request,
     @Query('user_id') userId: string,
     @Body() dto: CreateMinTemperatureDto,

@@ -45,7 +45,7 @@ export class MaxTemperatureService {
   }
 
   /**
-   * Menyimpan data max temperatur dan mencatat ke activity log
+   * Menyimpan data temperatur maksimal dan mencatat ke activity log
    */
   async saveMaxTemperature(
     dto: CreateMaxTemperatureDto,
@@ -81,7 +81,7 @@ export class MaxTemperatureService {
     if (maxTemperatureError) {
       return {
         success: false,
-        message: 'Gagal menyimpan data evaporation',
+        message: 'Gagal menyimpan data temperatur maksimal',
         error: maxTemperatureError,
       };
     }
@@ -94,7 +94,7 @@ export class MaxTemperatureService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Menambahkan Data Temperatur Maksimal',
-      description: `${namaAdmin} Menambahkan data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
+      description: `${namaAdmin} menambahkan data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -102,13 +102,13 @@ export class MaxTemperatureService {
 
     return {
       success: true,
-      message: 'Data temperatur maksimal berhasil disimpan',
+      message: 'Berhasil menyimpan data temperatur maksimal',
       data: insertedMaxTemperature,
     };
   }
 
   /**
-   * Mengubah data max temperatur dan mencatat ke activity log
+   * Mengubah data temperatur maksimal dan mencatat ke activity log
    */
   async updateMaxTemperature(
     dto: EditMaxTemperatureDto,
@@ -142,7 +142,7 @@ export class MaxTemperatureService {
     if (maxTemperatureError) {
       return {
         success: false,
-        message: 'Gagal menyimpan data evaporation',
+        message: 'Gagal menyimpan data temperatur maksimal',
         error: maxTemperatureError,
       };
     }
@@ -155,7 +155,7 @@ export class MaxTemperatureService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Mengubah Data Temperatur Maksimal',
-      description: `${namaAdmin} Mengubah data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
+      description: `${namaAdmin} mengubah data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -163,13 +163,13 @@ export class MaxTemperatureService {
 
     return {
       success: true,
-      message: 'Data temperatur maksimal berhasil diperbarui',
+      message: 'Berhasil memperbaharui data temperatur maksimal',
       data: updatedMaxTemperature,
     };
   }
 
   /**
-   * Menghapus data max temperatur dan mencatat ke activity log
+   * Menghapus data temperatur maksimal dan mencatat ke activity log
    */
   async deleteMaxTemperature(
     id: number,
@@ -190,18 +190,18 @@ export class MaxTemperatureService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil data max temperatur (untuk log)
+    // 2. Ambil data temperatur maksimal (untuk log)
     const { data: maxTemperatureData, error: getMaxTemperatureError } =
       await this.supabase
         .from('max_temperature')
-        .select('id, max_temperature, date')
+        .select('*')
         .eq('id', id)
         .single();
 
     if (getMaxTemperatureError) {
       return {
         success: false,
-        message: 'Gagal mengambil data max_temperature',
+        message: 'Gagal mengambil data temperatur maksimal',
         error: getMaxTemperatureError,
       };
     }
@@ -209,23 +209,22 @@ export class MaxTemperatureService {
     const { max_temperature, date } = maxTemperatureData;
 
     // 3. Hapus data max temperatur berdasarkan id
-    const { data: deletedMaxTemperature, error: maxTemperatureError } =
-      await this.supabase
-        .from('max_temperature')
-        .delete()
-        .eq('id', id)
-        .select()
-        .single();
+    const { error: maxTemperatureError } = await this.supabase
+      .from('max_temperature')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
 
     if (maxTemperatureError) {
       return {
         success: false,
-        message: 'Gagal menghapus data max_temperature',
+        message: 'Gagal menghapus data temperatur maksimal',
         error: maxTemperatureError,
       };
     }
 
-    // 3. Mencatat ke activity log
+    // 4. Mencatat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
@@ -233,7 +232,7 @@ export class MaxTemperatureService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Menghapus Data Temperatur Maksimal',
-      description: `${namaAdmin} Menghapus data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
+      description: `${namaAdmin} menghapus data temperatur maksimal dengan nilai ${max_temperature} untuk tanggal ${date}`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -241,8 +240,8 @@ export class MaxTemperatureService {
 
     return {
       success: true,
-      message: 'Data temperatur maksimal berhasil dihapus',
-      data: deletedMaxTemperature,
+      message: 'Berhasil menghapus data temperatur maksimal',
+      data: maxTemperatureData,
     };
   }
 
