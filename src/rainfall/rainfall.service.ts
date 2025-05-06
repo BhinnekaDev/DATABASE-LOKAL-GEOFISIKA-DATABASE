@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditRainfallDto } from '@/rainfall/dto/edit-rainfall.dto';
 import { CreateRainfallDto } from '@/rainfall/dto/create-rainfall.dto';
+import { ActivityLogService } from '@/activity-log/activity-log.service';
 
 dotenv.config();
 
@@ -99,6 +99,186 @@ export class RainfallService {
       success: true,
       message: 'Berhasil menyimpan data curah hujan',
       data: insertedRainfall,
+    };
+  }
+
+  /**
+   * Mengubah data temperatur minimal dan mencatat ke activity log
+   */
+  async updateRainfall(
+    dto: EditRainfallDto,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    const { id, user_id, date, rainfall } = dto;
+
+    // 1. Ambil data admin
+    const adminResponse = await this.getAdminData(user_id);
+    if (!adminResponse.success || !adminResponse.data) {
+      return {
+        success: false,
+        message: 'Data admin tidak ditemukan',
+        error: adminResponse.error,
+      };
+    }
+
+    const { first_name, last_name } = adminResponse.data;
+    const namaAdmin = `${first_name} ${last_name}`;
+
+    // 2. Update data curah hujan berdasarkan id
+    const { data: updatedRainfall, error: rainfallError } = await this.supabase
+      .from('rainfall')
+      .update({ rainfall, date })
+      .eq('id', id)
+      .select();
+
+    if (rainfallError || !updatedRainfall) {
+      return {
+        success: false,
+        message: 'Gagal mengubah data curah hujan',
+        error: rainfallError,
+      };
+    }
+
+    // 3. Mencatat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    await this.activityLogService.logActivity({
+      admin_id: user_id,
+      action: 'Mengubah data curah hujan',
+      description: `${namaAdmin} mengubah data curah hujan dengan nilai ${rainfall} untuk tanggal ${date}`,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      created_at: createdAt,
+    });
+
+    return {
+      success: true,
+      message: 'Berhasil mengubah data curah hujan',
+      data: updatedRainfall,
+    };
+  }
+
+  /**
+   * Menghapus data curah hujan dan mencatat ke activity log
+   */
+  async deleteRainfall(
+    id: number,
+    user_id: string,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    // 1. Ambil data admin
+    const adminResponse = await this.getAdminData(user_id);
+    if (!adminResponse.success || !adminResponse.data) {
+      return {
+        success: false,
+        message: 'Data admin tidak ditemukan',
+        error: adminResponse.error,
+      };
+    }
+
+    const { first_name, last_name } = adminResponse.data;
+    const namaAdmin = `${first_name} ${last_name}`;
+
+    // 2. Ambil data curah hujan (untuk log)
+    const { data: rainfallData, error: getRainfallError } = await this.supabase
+      .from('rainfall')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (getRainfallError || !rainfallData) {
+      return {
+        success: false,
+        message: 'Data curah hujan tidak ditemukan',
+        error: getRainfallError,
+      };
+    }
+
+    const { rainfall, date } = rainfallData;
+
+    // 3. Hapus data curah hujan berdasarkan id
+    const { data: deletedRainfall, error: rainfallError } = await this.supabase
+      .from('rainfall')
+      .delete()
+      .eq('id', id)
+      .select();
+
+    if (rainfallError || !deletedRainfall) {
+      return {
+        success: false,
+        message: 'Gagal menghapus data curah hujan',
+        error: rainfallError,
+      };
+    }
+
+    // 4. Mencatat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    await this.activityLogService.logActivity({
+      admin_id: user_id,
+      action: 'Menghapus Data curah hujan',
+      description: `${namaAdmin} menghapus data curah hujan dengan nilai ${rainfall} untuk tanggal ${date}`,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      created_at: createdAt,
+    });
+
+    return {
+      success: true,
+      message: 'Berhasil menghapus data temperatur minimal',
+      data: deletedRainfall,
+    };
+  }
+
+  /**
+   * Mengambil semua data curah hujan
+   */
+  async getAllRainfall() {
+    const { data, error } = await this.supabase.from('rainfall').select('*');
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data curah hujan',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil semua data curah hujan',
+      data: data,
+    };
+  }
+
+  /**
+   * Mengambil semua data curah hujan berdasarkan id
+   */
+  async getRainfallById(id: number) {
+    const { data, error } = await this.supabase
+      .from('rainfall')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data curah hujan berdasarkan id',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil data curah hujan berdasarkan id',
+      data,
     };
   }
 }

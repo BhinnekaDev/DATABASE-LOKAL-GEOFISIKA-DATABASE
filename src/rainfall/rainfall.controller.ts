@@ -43,4 +43,64 @@ export class RainfallController {
 
     return result;
   }
+
+  // Route untuk mengubah data curah hujan
+  @Put('/update')
+  async updateMinTemperature(
+    @Req() req: Request,
+    @Body() dto: EditRainfallDto,
+    @Query() querys: RainfallQueryDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = querys.user_id;
+    dto.id = querys.id;
+
+    const result = await this.rainfallService.updateRainfall(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menghapus data curah hujan
+  @ApiOkResponse({ description: 'Berhasil menghapus data curah hujan' })
+  @Delete('/delete')
+  async deleteMinTemperature(
+    @Req() req: Request,
+    @Query() querys: RainfallQueryDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    return await this.rainfallService.deleteRainfall(
+      querys.id,
+      querys.user_id,
+      ipAddress,
+      userAgent,
+    );
+  }
+
+  // Route untuk ambil semua data curah hujan
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan semua data curah hujan',
+  })
+  @Get('/get-all')
+  async getAllRainfall() {
+    const result = await this.rainfallService.getAllRainfall();
+    return result;
+  }
+
+  // Route untuk ambil data curah hujan berdasarkan id
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan data curah hujan berdasarkan id',
+  })
+  @Get('/get')
+  async getRainfallById(@Query() querys: GetRainfallQueryDto) {
+    const result = await this.rainfallService.getRainfallById(querys.id);
+    return result;
+  }
 }
