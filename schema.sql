@@ -143,7 +143,8 @@ create table "public"."observer" (
 
 create table "public"."rain_intensity" (
     "id" integer not null default nextval('rain_intensity_id_seq'::regclass),
-    "name" text
+    "name" text,
+    "date" date
 );
 
 
