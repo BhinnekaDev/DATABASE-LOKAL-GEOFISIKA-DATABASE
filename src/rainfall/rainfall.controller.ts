@@ -46,7 +46,7 @@ export class RainfallController {
 
   // Route untuk mengubah data curah hujan
   @Put('/update')
-  async updateMinTemperature(
+  async updateRainfall(
     @Req() req: Request,
     @Body() dto: EditRainfallDto,
     @Query() querys: RainfallQueryDto,
@@ -69,10 +69,7 @@ export class RainfallController {
   // Route untuk menghapus data curah hujan
   @ApiOkResponse({ description: 'Berhasil menghapus data curah hujan' })
   @Delete('/delete')
-  async deleteMinTemperature(
-    @Req() req: Request,
-    @Query() querys: RainfallQueryDto,
-  ) {
+  async deleteRainfall(@Req() req: Request, @Query() querys: RainfallQueryDto) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 

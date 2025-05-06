@@ -10,6 +10,7 @@ import { LoginLogModule } from '@/login-log/login-log.module';
 import { RainyDaysModule } from '@/rainy-days/rainy-days.module';
 import { EvaporationModule } from '@/evaporation/evaporation.module';
 import { ActivityLogModule } from '@/activity-log/activity-log.module';
+import { RainIntensityModule } from '@/rain-intensity/rain-intensity.module';
 import { MaxTemperatureModule } from '@/max-temperature/max-temperature.module';
 import { MinTemperatureModule } from '@/min-temperature/min-temperature.module';
 
@@ -21,6 +22,7 @@ const moduleFeatures = [
   RainyDaysModule,
   EvaporationModule,
   ActivityLogModule,
+  RainIntensityModule,
   MaxTemperatureModule,
   MinTemperatureModule,
 ];

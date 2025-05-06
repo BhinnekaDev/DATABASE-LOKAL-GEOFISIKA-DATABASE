@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-import { EditRainfallDto } from '@/rainfall/dto/edit-rainfall.dto';
-import { CreateRainfallDto } from '@/rainfall/dto/create-rainfall.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
+import { EditRainIntensityDto } from '@/rain-intensity/dto/edit-rain-intensity.dto';
+import { CreateRainIntensityDto } from '@/rain-intensity/dto/create-rain-intensity.dto';
 
 dotenv.config();
 
 @Injectable()
-export class RainfallService {
+export class RainIntensityService {
   private supabase: SupabaseClient;
 
   constructor(
@@ -45,14 +45,14 @@ export class RainfallService {
   }
 
   /**
-   * Menyimpan data curah hujan dan mencatat ke activity log
+   * Menyimpan data intensitas hujan dan mencatat ke activity log
    */
-  async saveRainfall(
-    dto: CreateRainfallDto,
+  async saveRainIntensity(
+    dto: CreateRainIntensityDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, date, rainfall } = dto;
+    const { user_id, date, name } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -67,17 +67,18 @@ export class RainfallService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Simpan data curah hujan
-    const { data: insertedRainfall, error: rainfallError } = await this.supabase
-      .from('rainfall')
-      .insert({ date, rainfall })
-      .select();
+    // 2. Simpan data intensitas hujan
+    const { data: insertedRainIntensity, error: rainIntensityError } =
+      await this.supabase
+        .from('rain_intensity')
+        .insert({ date, name })
+        .select();
 
-    if (rainfallError || !insertedRainfall) {
+    if (rainIntensityError || !insertedRainIntensity) {
       return {
         success: false,
-        message: 'Gagal menyimpan data curah hujan',
-        error: rainfallError,
+        message: 'Gagal menyimpan data intensitas hujan',
+        error: rainIntensityError,
       };
     }
 
@@ -88,8 +89,8 @@ export class RainfallService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Curah Hujan',
-      description: `${namaAdmin} menambahkan data curah hujan dengan nilai ${rainfall} untuk tanggal ${date}`,
+      action: 'Menambahkan data intensitas hujan',
+      description: `${namaAdmin} menambahkan data intensitas hujan dengan nama ${name} untuk tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -97,20 +98,20 @@ export class RainfallService {
 
     return {
       success: true,
-      message: 'Berhasil menyimpan data curah hujan',
-      data: insertedRainfall,
+      message: 'Berhasil menyimpan data intensitas hujan',
+      data: insertedRainIntensity,
     };
   }
 
   /**
-   * Mengubah data curah hujan dan mencatat ke activity log
+   * Mengubah data temperatur minimal dan mencatat ke activity log
    */
-  async updateRainfall(
-    dto: EditRainfallDto,
+  async updateRainIntensity(
+    dto: EditRainIntensityDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id, user_id, date, rainfall } = dto;
+    const { id, user_id, date, name } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -125,18 +126,19 @@ export class RainfallService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Update data curah hujan berdasarkan id
-    const { data: updatedRainfall, error: rainfallError } = await this.supabase
-      .from('rainfall')
-      .update({ rainfall, date })
-      .eq('id', id)
-      .select();
+    // 2. Update data intensitas hujan berdasarkan id
+    const { data: updatedRainIntensity, error: rainIntensityError } =
+      await this.supabase
+        .from('rain_intensity')
+        .update({ name, date })
+        .eq('id', id)
+        .select();
 
-    if (rainfallError || !updatedRainfall) {
+    if (rainIntensityError || !updatedRainIntensity) {
       return {
         success: false,
-        message: 'Gagal mengubah data curah hujan',
-        error: rainfallError,
+        message: 'Gagal mengubah data intensitas hujan',
+        error: rainIntensityError,
       };
     }
 
@@ -147,8 +149,8 @@ export class RainfallService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah Data Curah Hujan',
-      description: `${namaAdmin} mengubah data curah hujan dengan nilai ${rainfall} untuk tanggal ${date}`,
+      action: 'Mengubah Data Intensitas Hujan',
+      description: `${namaAdmin} mengubah data intensitas hujan dengan nama ${name} untuk tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -156,15 +158,15 @@ export class RainfallService {
 
     return {
       success: true,
-      message: 'Berhasil mengubah data curah hujan',
-      data: updatedRainfall,
+      message: 'Berhasil mengubah data intensitas hujan',
+      data: updatedRainIntensity,
     };
   }
 
   /**
-   * Menghapus data curah hujan dan mencatat ke activity log
+   * Menghapus data intensitas hujan dan mencatat ke activity log
    */
-  async deleteRainfall(
+  async deleteRainIntensity(
     id: number,
     user_id: string,
     ipAddress: string,
@@ -183,35 +185,35 @@ export class RainfallService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil data curah hujan (untuk log)
-    const { data: rainfallData, error: getRainfallError } = await this.supabase
-      .from('rainfall')
-      .select('*')
-      .eq('id', id)
-      .single();
+    // 2. Ambil data intensitas hujan (untuk log)
+    const { data: rainIntensityData, error: rainIntensityError } =
+      await this.supabase
+        .from('rain_intensity')
+        .select(`*`)
+        .eq('id', id)
+        .single();
 
-    if (getRainfallError || !rainfallData) {
+    if (rainIntensityError || !rainIntensityData) {
       return {
         success: false,
-        message: 'Data curah hujan tidak ditemukan',
-        error: getRainfallError,
+        message: 'Data intensitas hujan tidak ditemukan',
+        error: rainIntensityError,
       };
     }
 
-    const { rainfall, date } = rainfallData;
+    const { name, date } = rainIntensityData;
 
-    // 3. Hapus data curah hujan berdasarkan id
-    const { error: rainfallError } = await this.supabase
-      .from('rainfall')
+    // 3. Hapus data intensitas hujan berdasarkan id
+    const { error: deleteRainIntensityError } = await this.supabase
+      .from('rain_intensity')
       .delete()
-      .eq('id', id)
-      .select();
+      .eq('id', id);
 
-    if (rainfallError) {
+    if (deleteRainIntensityError) {
       return {
         success: false,
-        message: 'Gagal menghapus data curah hujan',
-        error: rainfallError,
+        message: 'Gagal menghapus data intensitas hujan',
+        error: deleteRainIntensityError,
       };
     }
 
@@ -222,8 +224,8 @@ export class RainfallService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus Data Curah Hujan',
-      description: `${namaAdmin} menghapus data curah hujan dengan nilai ${rainfall} untuk tanggal ${date}`,
+      action: 'Menghapus Data Intensitas Hujan',
+      description: `${namaAdmin} menghapus data intensitas hujan dengan nama ${name} untuk tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -231,38 +233,40 @@ export class RainfallService {
 
     return {
       success: true,
-      message: 'Berhasil menghapus data curah hujan',
-      data: rainfallData,
+      message: 'Berhasil menghapus data intensitas hujan',
+      data: rainIntensityData,
     };
   }
 
   /**
-   * Mengambil semua data curah hujan
+   * Mengambil semua data intensitas hujan
    */
-  async getAllRainfall() {
-    const { data, error } = await this.supabase.from('rainfall').select('*');
+  async getAllRainIntensity() {
+    const { data, error } = await this.supabase
+      .from('rain_intensity')
+      .select('*');
 
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data curah hujan',
+        message: 'Gagal mengambil data intensitas hujan',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil semua data curah hujan',
+      message: 'Berhasil mengambil semua data intensitas hujan',
       data: data,
     };
   }
 
   /**
-   * Mengambil semua data curah hujan berdasarkan id
+   * Mengambil semua data intensitas hujan berdasarkan id
    */
-  async getRainfallById(id: number) {
+  async getRainIntensityById(id: number) {
     const { data, error } = await this.supabase
-      .from('rainfall')
+      .from('rain_intensity')
       .select('*')
       .eq('id', id)
       .single();
@@ -270,14 +274,14 @@ export class RainfallService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data curah hujan berdasarkan id',
+        message: 'Gagal mengambil data intensitas hujan berdasarkan id',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data curah hujan berdasarkan id',
+      message: 'Berhasil mengambil data intensitas hujan berdasarkan id',
       data,
     };
   }
