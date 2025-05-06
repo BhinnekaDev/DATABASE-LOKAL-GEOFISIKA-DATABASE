@@ -20,8 +20,6 @@ create sequence "public"."max_temperature_id_seq";
 
 create sequence "public"."min_temperature_id_seq";
 
-create sequence "public"."observer_id_seq";
-
 create sequence "public"."rain_intensity_id_seq";
 
 create sequence "public"."rainfall_id_seq";
@@ -82,14 +80,14 @@ create table "public"."document" (
 create table "public"."earthquake" (
     "id" integer not null default nextval('earthquake_id_seq'::regclass),
     "date" date,
-    "time" time without time zone,
+    "time" text,
     "mmi" text,
     "description" text,
     "depth" double precision,
     "latitude" double precision,
     "longitude" double precision,
     "magnitude" double precision,
-    "observer_id" integer
+    "observer_name" text
 );
 
 
@@ -132,12 +130,6 @@ create table "public"."min_temperature" (
     "id" integer not null default nextval('min_temperature_id_seq'::regclass),
     "min_temperature" double precision,
     "date" date
-);
-
-
-create table "public"."observer" (
-    "id" integer not null default nextval('observer_id_seq'::regclass),
-    "observer_name" text
 );
 
 
@@ -211,8 +203,6 @@ alter sequence "public"."max_temperature_id_seq" owned by "public"."max_temperat
 
 alter sequence "public"."min_temperature_id_seq" owned by "public"."min_temperature"."id";
 
-alter sequence "public"."observer_id_seq" owned by "public"."observer"."id";
-
 alter sequence "public"."rain_intensity_id_seq" owned by "public"."rain_intensity"."id";
 
 alter sequence "public"."rainfall_id_seq" owned by "public"."rainfall"."id";
@@ -255,8 +245,6 @@ CREATE UNIQUE INDEX max_temperature_pkey ON public.max_temperature USING btree (
 
 CREATE UNIQUE INDEX min_temperature_pkey ON public.min_temperature USING btree (id);
 
-CREATE UNIQUE INDEX observer_pkey ON public.observer USING btree (id);
-
 CREATE UNIQUE INDEX rain_intensity_pkey ON public.rain_intensity USING btree (id);
 
 CREATE UNIQUE INDEX rainfall_pkey ON public.rainfall USING btree (id);
@@ -293,8 +281,6 @@ alter table "public"."max_temperature" add constraint "max_temperature_pkey" PRI
 
 alter table "public"."min_temperature" add constraint "min_temperature_pkey" PRIMARY KEY using index "min_temperature_pkey";
 
-alter table "public"."observer" add constraint "observer_pkey" PRIMARY KEY using index "observer_pkey";
-
 alter table "public"."rain_intensity" add constraint "rain_intensity_pkey" PRIMARY KEY using index "rain_intensity_pkey";
 
 alter table "public"."rainfall" add constraint "rainfall_pkey" PRIMARY KEY using index "rainfall_pkey";
@@ -328,10 +314,6 @@ alter table "public"."air_pressure" validate constraint "air_pressure_id_weather
 alter table "public"."average_temperature" add constraint "average_temperature_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
 
 alter table "public"."average_temperature" validate constraint "average_temperature_id_weather_data_fkey";
-
-alter table "public"."earthquake" add constraint "earthquake_observer_id_fkey" FOREIGN KEY (observer_id) REFERENCES observer(id) ON DELETE SET NULL not valid;
-
-alter table "public"."earthquake" validate constraint "earthquake_observer_id_fkey";
 
 alter table "public"."humidity" add constraint "humidity_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
 
@@ -876,48 +858,6 @@ grant truncate on table "public"."min_temperature" to "service_role";
 
 grant update on table "public"."min_temperature" to "service_role";
 
-grant delete on table "public"."observer" to "anon";
-
-grant insert on table "public"."observer" to "anon";
-
-grant references on table "public"."observer" to "anon";
-
-grant select on table "public"."observer" to "anon";
-
-grant trigger on table "public"."observer" to "anon";
-
-grant truncate on table "public"."observer" to "anon";
-
-grant update on table "public"."observer" to "anon";
-
-grant delete on table "public"."observer" to "authenticated";
-
-grant insert on table "public"."observer" to "authenticated";
-
-grant references on table "public"."observer" to "authenticated";
-
-grant select on table "public"."observer" to "authenticated";
-
-grant trigger on table "public"."observer" to "authenticated";
-
-grant truncate on table "public"."observer" to "authenticated";
-
-grant update on table "public"."observer" to "authenticated";
-
-grant delete on table "public"."observer" to "service_role";
-
-grant insert on table "public"."observer" to "service_role";
-
-grant references on table "public"."observer" to "service_role";
-
-grant select on table "public"."observer" to "service_role";
-
-grant trigger on table "public"."observer" to "service_role";
-
-grant truncate on table "public"."observer" to "service_role";
-
-grant update on table "public"."observer" to "service_role";
-
 grant delete on table "public"."rain_intensity" to "anon";
 
 grant insert on table "public"."rain_intensity" to "anon";
@@ -1211,10 +1151,3 @@ grant trigger on table "public"."wind_direction_and_speed" to "service_role";
 grant truncate on table "public"."wind_direction_and_speed" to "service_role";
 
 grant update on table "public"."wind_direction_and_speed" to "service_role";
-
-create policy "Hanya admin bisa lihat datanya sendiri"
-on "public"."admin"
-as permissive
-for select
-to public
-using ((auth.uid() = user_id));

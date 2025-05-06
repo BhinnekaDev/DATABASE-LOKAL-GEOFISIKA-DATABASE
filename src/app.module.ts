@@ -8,6 +8,7 @@ import { AdminModule } from '@/admin/admin.module';
 import { RainfallModule } from '@/rainfall/rainfall.module';
 import { LoginLogModule } from '@/login-log/login-log.module';
 import { RainyDaysModule } from '@/rainy-days/rainy-days.module';
+import { EarthquakeModule } from '@/earthquake/earthquake.module';
 import { EvaporationModule } from '@/evaporation/evaporation.module';
 import { ActivityLogModule } from '@/activity-log/activity-log.module';
 import { RainIntensityModule } from '@/rain-intensity/rain-intensity.module';
@@ -21,6 +22,7 @@ const moduleFeatures = [
   LoginLogModule,
   RainfallModule,
   RainyDaysModule,
+  EarthquakeModule,
   EvaporationModule,
   ActivityLogModule,
   RainIntensityModule,
