@@ -149,7 +149,8 @@ create table "public"."rain_intensity" (
 
 create table "public"."rainfall" (
     "id" integer not null default nextval('rainfall_id_seq'::regclass),
-    "rainfall" double precision
+    "rainfall" double precision,
+    "date" date
 );
 
 
