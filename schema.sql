@@ -164,7 +164,8 @@ create table "public"."rainy_days" (
 
 create table "public"."sunshine_duration" (
     "id" integer not null default nextval('sunshine_duration_id_seq'::regclass),
-    "sunshine_duration" double precision
+    "sunshine_duration" double precision,
+    "date" date
 );
 
 

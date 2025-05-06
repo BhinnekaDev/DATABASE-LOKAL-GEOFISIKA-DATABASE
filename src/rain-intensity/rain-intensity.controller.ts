@@ -23,7 +23,6 @@ export class RainIntensityController {
   constructor(private readonly rainIntensityService: RainIntensityService) {}
 
   // Route untuk menambah data intensitas hujan
-  @ApiOkResponse()
   @Post('/insert')
   async saveRainIntensity(
     @Req() req: Request,
