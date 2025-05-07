@@ -43,7 +43,7 @@ export class HumidityController {
     return result;
   }
 
-  // Route untuk mengubah data evaporation
+  // Route untuk mengubah data kelembapan
   @Put('/update')
   async updateHumidity(
     @Req() req: Request,

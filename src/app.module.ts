@@ -12,6 +12,7 @@ import { RainyDaysModule } from '@/rainy-days/rainy-days.module';
 import { EarthquakeModule } from '@/earthquake/earthquake.module';
 import { EvaporationModule } from '@/evaporation/evaporation.module';
 import { ActivityLogModule } from '@/activity-log/activity-log.module';
+import { AirPressureModule } from '@/air-pressure/air-pressure.module';
 import { RainIntensityModule } from '@/rain-intensity/rain-intensity.module';
 import { MaxTemperatureModule } from '@/max-temperature/max-temperature.module';
 import { MinTemperatureModule } from '@/min-temperature/min-temperature.module';
@@ -27,6 +28,7 @@ const moduleFeatures = [
   EarthquakeModule,
   EvaporationModule,
   ActivityLogModule,
+  AirPressureModule,
   RainIntensityModule,
   MaxTemperatureModule,
   MinTemperatureModule,

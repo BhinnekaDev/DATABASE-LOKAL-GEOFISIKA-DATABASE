@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
-import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
+import { EditAirPressureDto } from '@/air-pressure/dto/edit-air-pressure.dto';
+import { CreateAirPressureDto } from '@/air-pressure/dto/create-air-pressure.dto';
 
 dotenv.config();
 
 @Injectable()
-export class HumidityService {
+export class AirPressureService {
   private supabase: SupabaseClient;
 
   constructor(
@@ -45,18 +45,20 @@ export class HumidityService {
   }
 
   /**
-   * Menyimpan data kelembapan dan mencatat ke activity log
+   * Menyimpan data tekanan udara dan mencatat ke activity log
    */
-  async saveHumidity(
-    dto: CreateHumidityDto,
+  async saveAirPressure(
+    dto: CreateAirPressureDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, humidity_07, humidity_13, humidity_18 } = dto;
-
-    const avg_humidity = parseFloat(
-      ((humidity_07 + humidity_13 + humidity_18) / 3).toFixed(2),
-    );
+    const {
+      user_id,
+      air_pressure,
+      air_pressure_07,
+      air_pressure_13,
+      air_pressure_18,
+    } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -71,23 +73,24 @@ export class HumidityService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Simpan data kelembapan
-    const { data: insertedHumidity, error: humidityError } = await this.supabase
-      .from('humidity')
-      .insert({
-        avg_humidity,
-        humidity_07,
-        humidity_13,
-        humidity_18,
-      })
-      .select()
-      .single();
+    // 2. Simpan data tekanan udara
+    const { data: insertedAirPressure, error: airPressureError } =
+      await this.supabase
+        .from('air_pressure')
+        .insert({
+          air_pressure,
+          air_pressure_07,
+          air_pressure_13,
+          air_pressure_18,
+        })
+        .select()
+        .single();
 
-    if (humidityError || !insertedHumidity) {
+    if (airPressureError || !insertedAirPressure) {
       return {
         success: false,
-        message: 'Gagal menyimpan data kelembapan',
-        error: humidityError,
+        message: 'Gagal menyimpan data tekanan udara',
+        error: airPressureError,
       };
     }
 
@@ -98,8 +101,8 @@ export class HumidityService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Kelembapan',
-      description: `${namaAdmin} menambahkan data kelembapan dengan rata-rata ${avg_humidity}%. Rincian kelembapan tercatat pada pukul 07:00 sebesar ${humidity_07}%, pukul 13:00 sebesar ${humidity_13}%, dan pukul 18:00 sebesar ${humidity_18}%.`,
+      action: 'Menambahkan Data Tekanan Udara',
+      description: `${namaAdmin} menambahkan data tekanan udara sebesar ${air_pressure}, dengan rincian: 07.00 = ${air_pressure_07}, 13.00 = ${air_pressure_13}, 18.00 = ${air_pressure_18}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -107,24 +110,27 @@ export class HumidityService {
 
     return {
       success: true,
-      message: 'Berhasil menyimpan data kelembapan',
-      data: insertedHumidity,
+      message: 'Berhasil menyimpan data tekanan udara',
+      data: insertedAirPressure,
     };
   }
 
   /**
-   * Mengubah data kelembapan dan mencatat ke activity log
+   * Mengubah data tekanan udara dan mencatat ke activity log
    */
-  async updateHumidity(
-    dto: EditHumidityDto,
+  async updateAirPressure(
+    dto: EditAirPressureDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id, user_id, humidity_07, humidity_13, humidity_18 } = dto;
-
-    const avg_humidity = parseFloat(
-      ((humidity_07 + humidity_13 + humidity_18) / 3).toFixed(2),
-    );
+    const {
+      id,
+      user_id,
+      air_pressure,
+      air_pressure_07,
+      air_pressure_13,
+      air_pressure_18,
+    } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -139,24 +145,25 @@ export class HumidityService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Update data kelembapan berdasarkan id
-    const { data: updatedHumidity, error: humidityError } = await this.supabase
-      .from('humidity')
-      .update({
-        avg_humidity,
-        humidity_07,
-        humidity_13,
-        humidity_18,
-      })
-      .eq('id', id)
-      .select()
-      .single();
+    // 2. Update data tekanan udara berdasarkan id
+    const { data: updatedAirPressure, error: airPressureError } =
+      await this.supabase
+        .from('air_pressure')
+        .update({
+          air_pressure,
+          air_pressure_07,
+          air_pressure_13,
+          air_pressure_18,
+        })
+        .eq('id', id)
+        .select()
+        .single();
 
-    if (humidityError || !updatedHumidity) {
+    if (airPressureError || !updatedAirPressure) {
       return {
         success: false,
-        message: 'Gagal memperbarui data kelembapan',
-        error: humidityError,
+        message: 'Gagal memperbarui data tekanan udara',
+        error: airPressureError,
       };
     }
 
@@ -167,8 +174,8 @@ export class HumidityService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah Data Kelembapan',
-      description: `${namaAdmin} mengubah data kelembapan dengan rata-rata ${avg_humidity}%. Rincian kelembapan tercatat pada pukul 07:00 sebesar ${humidity_07}%, pukul 13:00 sebesar ${humidity_13}%, dan pukul 18:00 sebesar ${humidity_18}%.`,
+      action: 'Mengubah Data Tekanan Udara',
+      description: `${namaAdmin} mengubah data tekanan udara sebesar ${air_pressure}, dengan rincian: 07.00 = ${air_pressure_07}, 13.00 = ${air_pressure_13}, 18.00 = ${air_pressure_18}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: updatedAt,
@@ -176,15 +183,15 @@ export class HumidityService {
 
     return {
       success: true,
-      message: 'Berhasil memperbarui data kelembapan',
-      data: updatedHumidity,
+      message: 'Berhasil memperbarui data tekanan udara',
+      data: updatedAirPressure,
     };
   }
 
   /**
-   * Menghapus data kelembapan dan mencatat ke activity log
+   * Menghapus data tekanan udara dan mencatat ke activity log
    */
-  async deleteHumidity(
+  async deleteAirPressure(
     id: number,
     user_id: string,
     ipAddress: string,
@@ -203,35 +210,37 @@ export class HumidityService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil data kelembapan (untuk log)
-    const { data: humidityData, error: getHumidityError } = await this.supabase
-      .from('humidity')
-      .select('*')
-      .eq('id', id)
-      .single();
+    // 2. Ambil data tekanan udara (untuk log)
+    const { data: airPressureData, error: getAirPressureError } =
+      await this.supabase
+        .from('air_pressure')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (getHumidityError || !humidityData) {
+    if (getAirPressureError || !airPressureData) {
       return {
         success: false,
         message: 'Gagal mengambil data kelembapan',
-        error: getHumidityError,
+        error: getAirPressureError,
       };
     }
 
-    const { avg_humidity, humidity_07, humidity_13, humidity_18 } =
-      humidityData;
+    const { air_pressure, air_pressure_07, air_pressure_13, air_pressure_18 } =
+      airPressureData;
 
-    // 3. Hapus data kelembapan
-    const { error: deleteHumidityError } = await this.supabase
-      .from('humidity')
+    // 3. Hapus data tekanan udara
+    const { error: humidityError } = await this.supabase
+      .from('air_pressure')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .select();
 
-    if (deleteHumidityError) {
+    if (humidityError) {
       return {
         success: false,
-        message: 'Gagal menghapus data kelembapan',
-        error: deleteHumidityError,
+        message: 'Gagal menghapus data tekanan udara',
+        error: humidityError,
       };
     }
 
@@ -242,8 +251,8 @@ export class HumidityService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus Data Kelembapan',
-      description: `${namaAdmin} menghapus data kelembapan dengan rata-rata ${avg_humidity}%. Rincian kelembapan tercatat pada pukul 07:00 sebesar ${humidity_07}%, pukul 13:00 sebesar ${humidity_13}%, dan pukul 18:00 sebesar ${humidity_18}%.`,
+      action: 'Menghapus Data Tekanan Udara',
+      description: `${namaAdmin} menghapus data tekanan udara sebesar ${air_pressure}, dengan rincian: 07.00 = ${air_pressure_07}, 13.00 = ${air_pressure_13}, 18.00 = ${air_pressure_18}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: deletedAt,
@@ -251,38 +260,40 @@ export class HumidityService {
 
     return {
       success: true,
-      message: 'Berhasil menghapus data kelembapan',
-      data: humidityData,
+      message: 'Berhasil menghapus data tekanan udara',
+      data: airPressureData,
     };
   }
 
   /**
-   * Mengambil semua data humidity
+   * Mengambil semua data tekanan udara
    */
-  async getAllHumidity() {
-    const { data, error } = await this.supabase.from('humidity').select(`*`);
+  async getAllAirPressure() {
+    const { data, error } = await this.supabase
+      .from('air_pressure')
+      .select(`*`);
 
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data kelembapan',
+        message: 'Gagal mengambil data tekanan udara',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil semua data kelembapan',
+      message: 'Berhasil mengambil semua data tekanan udara',
       data: data,
     };
   }
 
   /**
-   * Mengambil semua data humidity berdasarkan id
+   * Mengambil semua data tekanan udara berdasarkan id
    */
-  async getHumidityById(id: number) {
+  async getAirPressureById(id: number) {
     const { data, error } = await this.supabase
-      .from('humidity')
+      .from('air_pressure')
       .select('*')
       .eq('id', id)
       .single();
@@ -290,14 +301,14 @@ export class HumidityService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data kelembapan berdasarkan id',
+        message: 'Gagal mengambil data tekanan udara berdasarkan id',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data kelembapan berdasarkan id',
+      message: 'Berhasil mengambil data tekanan udara berdasarkan id',
       data,
     };
   }
