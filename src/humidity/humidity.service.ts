@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
+import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
-import { EditEvaporationDto } from '@/evaporation/dto/edit-evaporation.dto';
-import { CreateEvaporationDto } from '@/evaporation/dto/create-evaporation.dto';
 
 dotenv.config();
 
 @Injectable()
-export class EvaporationService {
+export class HumidityService {
   private supabase: SupabaseClient;
 
   constructor(
@@ -45,14 +45,18 @@ export class EvaporationService {
   }
 
   /**
-   * Menyimpan data penguapan dan mencatat ke activity log
+   * Menyimpan data kelembapan dan mencatat ke activity log
    */
-  async saveEvaporation(
-    dto: CreateEvaporationDto,
+  async saveHumidity(
+    dto: CreateHumidityDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, date, evaporation } = dto;
+    const { user_id, humidity_07, humidity_13, humidity_18 } = dto;
+
+    const avg_humidity = parseFloat(
+      ((humidity_07 + humidity_13 + humidity_18) / 3).toFixed(2),
+    );
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -67,34 +71,35 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Simpan data evaporation dengan select()
-    const { data: insertedEvaporation, error: evaporationError } =
-      await this.supabase
-        .from('evaporation')
-        .insert({
-          date,
-          evaporation,
-        })
-        .select()
-        .single();
+    // 2. Simpan data kelembapan
+    const { data: insertedHumidity, error: humidityError } = await this.supabase
+      .from('humidity')
+      .insert({
+        avg_humidity,
+        humidity_07,
+        humidity_13,
+        humidity_18,
+      })
+      .select()
+      .single();
 
-    if (evaporationError) {
+    if (humidityError || !insertedHumidity) {
       return {
         success: false,
-        message: 'Gagal menyimpan data penguapan',
-        error: evaporationError,
+        message: 'Gagal menyimpan data kelembapan',
+        error: humidityError,
       };
     }
 
-    // 3. Catat ke activity log
+    // 3. Mencatat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Penguapan',
-      description: `${namaAdmin} menambahkan data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
+      action: 'Menambahkan Data Kelembapan',
+      description: `${namaAdmin} menambahkan data kelembapan dengan rata-rata ${avg_humidity}%. Rincian kelembapan tercatat pada pukul 07:00 sebesar ${humidity_07}%, pukul 13:00 sebesar ${humidity_13}%, dan pukul 18:00 sebesar ${humidity_18}%.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -102,20 +107,24 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Berhasil menyimpan data penguapan',
-      data: insertedEvaporation,
+      message: 'Berhasil menyimpan data kelembapan',
+      data: insertedHumidity,
     };
   }
 
   /**
-   * Mengubah data penguapan dan mencatat ke activity log
+   * Mengubah data kelembapan dan mencatat ke activity log
    */
-  async updateEvaporation(
-    dto: EditEvaporationDto,
+  async updateHumidity(
+    dto: EditHumidityDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id, user_id, date, evaporation } = dto;
+    const { id, user_id, humidity_07, humidity_13, humidity_18 } = dto;
+
+    const avg_humidity = parseFloat(
+      ((humidity_07 + humidity_13 + humidity_18) / 3).toFixed(2),
+    );
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -130,20 +139,24 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Update data evaporation berdasarkan id
-    const { data: updatedEvaporation, error: evaporationError } =
-      await this.supabase
-        .from('evaporation')
-        .update({ evaporation, date })
-        .eq('id', id)
-        .select()
-        .single();
+    // 2. Update data kelembapan berdasarkan id
+    const { data: updatedHumidity, error: humidityError } = await this.supabase
+      .from('humidity')
+      .update({
+        avg_humidity,
+        humidity_07,
+        humidity_13,
+        humidity_18,
+      })
+      .eq('id', id)
+      .select()
+      .single();
 
-    if (evaporationError) {
+    if (humidityError || !updatedHumidity) {
       return {
         success: false,
-        message: 'Gagal mengubah data penguapan',
-        error: evaporationError,
+        message: 'Gagal memperbarui data kelembapan',
+        error: humidityError,
       };
     }
 
@@ -154,8 +167,8 @@ export class EvaporationService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah Data Penguapan',
-      description: `${namaAdmin} mengubah nilai penguapan menjadi ${evaporation} untuk tanggal ${date}`,
+      action: 'Mengubah Data Kelembapan',
+      description: `${namaAdmin} menambahkan data kelembapan dengan rata-rata ${avg_humidity}%. Rincian kelembapan tercatat pada pukul 07:00 sebesar ${humidity_07}%, pukul 13:00 sebesar ${humidity_13}%, dan pukul 18:00 sebesar ${humidity_18}%.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: updatedAt,
@@ -163,15 +176,15 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Berhasil memperbarui data penguapan',
-      data: updatedEvaporation,
+      message: 'Berhasil memperbarui data kelembapan',
+      data: updatedHumidity,
     };
   }
 
   /**
-   * Menghapus data penguapan dan mencatat ke activity log
+   * Menghapus data kelembapan dan mencatat ke activity log
    */
-  async deleteEvaporation(
+  async deleteHumidity(
     id: number,
     user_id: string,
     ipAddress: string,
@@ -190,31 +203,35 @@ export class EvaporationService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil data penguapan (untuk log)
-    const { data: evaporationData, error: getEvaporationError } =
-      await this.supabase.from('evaporation').select('*').eq('id', id).single();
+    // 2. Ambil data kelembapan (untuk log)
+    const { data: humidityData, error: getHumidityError } = await this.supabase
+      .from('humidity')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (getEvaporationError || !evaporationData) {
+    if (getHumidityError || !humidityData) {
       return {
         success: false,
-        message: 'Data evaporation tidak ditemukan',
-        error: getEvaporationError,
+        message: 'Gagal mengambil data kelembapan',
+        error: getHumidityError,
       };
     }
 
-    const { date, evaporation } = evaporationData;
+    const { avg_humidity, humidity_07, humidity_13, humidity_18 } =
+      humidityData;
 
-    // 3. Hapus data evaporation
-    const { error: evaporationError } = await this.supabase
-      .from('evaporation')
+    // 3. Hapus data kelembapan
+    const { error: deleteHumidityError } = await this.supabase
+      .from('humidity')
       .delete()
       .eq('id', id);
 
-    if (evaporationError) {
+    if (deleteHumidityError) {
       return {
         success: false,
-        message: 'Gagal menghapus data penguapan',
-        error: evaporationError,
+        message: 'Gagal menghapus data kelembapan',
+        error: deleteHumidityError,
       };
     }
 
@@ -225,8 +242,8 @@ export class EvaporationService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus Data Penguapan',
-      description: `${namaAdmin} menghapus data penguapan dengan nilai ${evaporation} untuk tanggal ${date}`,
+      action: 'Menghapus Data Kelembapan',
+      description: `${namaAdmin} menghapus data kelembapan dengan rata-rata ${avg_humidity}%. Rincian kelembapan tercatat pada pukul 07:00 sebesar ${humidity_07}%, pukul 13:00 sebesar ${humidity_13}%, dan pukul 18:00 sebesar ${humidity_18}%.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: deletedAt,
@@ -234,38 +251,38 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Berhasil menghapus data penguapan',
-      data: evaporationData,
+      message: 'Berhasil menghapus data kelembapan',
+      data: humidityData,
     };
   }
 
   /**
-   * Mengambil semua data evaporation
+   * Mengambil semua data humidity
    */
-  async getAllEvaporation() {
-    const { data, error } = await this.supabase.from('evaporation').select(`*`);
+  async getAllHumidity() {
+    const { data, error } = await this.supabase.from('humidity').select(`*`);
 
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data penguapan',
+        message: 'Gagal mengambil data kelembapan',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil semua data evaporation',
+      message: 'Berhasil mengambil semua data kelembapan',
       data: data,
     };
   }
 
   /**
-   * Mengambil semua data evaporation berdasarkan id
+   * Mengambil semua data humidity berdasarkan id
    */
-  async getEvaporationById(id: number) {
+  async getHumidityById(id: number) {
     const { data, error } = await this.supabase
-      .from('evaporation')
+      .from('humidity')
       .select('*')
       .eq('id', id)
       .single();
@@ -273,14 +290,14 @@ export class EvaporationService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data penguapan berdasarkan id',
+        message: 'Gagal mengambil data kelembapan berdasarkan id',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data penguapan berdasarkan id',
+      message: 'Berhasil mengambil data kelembapan berdasarkan id',
       data,
     };
   }
