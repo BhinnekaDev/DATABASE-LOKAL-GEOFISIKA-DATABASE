@@ -30,8 +30,6 @@ create sequence "public"."sunshine_duration_id_seq";
 
 create sequence "public"."time_signature_id_seq";
 
-create sequence "public"."weather_data_id_seq";
-
 create sequence "public"."wind_direction_and_speed_id_seq";
 
 create table "public"."activity_log" (
@@ -66,8 +64,10 @@ create table "public"."air_pressure" (
 
 create table "public"."average_temperature" (
     "id" integer not null default nextval('average_temperature_id_seq'::regclass),
-    "id_weather_data" integer,
-    "avg_temperature" double precision
+    "avg_temperature" double precision,
+    "avg_temperature_07" double precision,
+    "avg_temperature_13" double precision,
+    "avg_temperature_18" double precision
 );
 
 
@@ -171,14 +171,6 @@ create table "public"."time_signature" (
 );
 
 
-create table "public"."weather_data" (
-    "id" integer not null default nextval('weather_data_id_seq'::regclass),
-    "07_00" double precision,
-    "13_00" double precision,
-    "18_00" double precision
-);
-
-
 create table "public"."wind_direction_and_speed" (
     "id" integer not null default nextval('wind_direction_and_speed_id_seq'::regclass),
     "max_wind_speed" double precision,
@@ -216,8 +208,6 @@ alter sequence "public"."rainy_days_id_seq" owned by "public"."rainy_days"."id";
 alter sequence "public"."sunshine_duration_id_seq" owned by "public"."sunshine_duration"."id";
 
 alter sequence "public"."time_signature_id_seq" owned by "public"."time_signature"."id";
-
-alter sequence "public"."weather_data_id_seq" owned by "public"."weather_data"."id";
 
 alter sequence "public"."wind_direction_and_speed_id_seq" owned by "public"."wind_direction_and_speed"."id";
 
@@ -259,8 +249,6 @@ CREATE UNIQUE INDEX sunshine_duration_pkey ON public.sunshine_duration USING btr
 
 CREATE UNIQUE INDEX time_signature_pkey ON public.time_signature USING btree (id);
 
-CREATE UNIQUE INDEX weather_data_pkey ON public.weather_data USING btree (id);
-
 CREATE UNIQUE INDEX wind_direction_and_speed_pkey ON public.wind_direction_and_speed USING btree (id);
 
 alter table "public"."admin" add constraint "admin_pkey" PRIMARY KEY using index "admin_pkey";
@@ -295,8 +283,6 @@ alter table "public"."sunshine_duration" add constraint "sunshine_duration_pkey"
 
 alter table "public"."time_signature" add constraint "time_signature_pkey" PRIMARY KEY using index "time_signature_pkey";
 
-alter table "public"."weather_data" add constraint "weather_data_pkey" PRIMARY KEY using index "weather_data_pkey";
-
 alter table "public"."wind_direction_and_speed" add constraint "wind_direction_and_speed_pkey" PRIMARY KEY using index "wind_direction_and_speed_pkey";
 
 alter table "public"."activity_log" add constraint "activity_log_admin_id_fkey" FOREIGN KEY (admin_id) REFERENCES admin(user_id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
@@ -311,10 +297,6 @@ alter table "public"."admin" validate constraint "admin_user_id_fkey";
 
 alter table "public"."admin" add constraint "admin_user_id_unique" UNIQUE using index "admin_user_id_unique";
 
-alter table "public"."average_temperature" add constraint "average_temperature_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
-
-alter table "public"."average_temperature" validate constraint "average_temperature_id_weather_data_fkey";
-
 alter table "public"."lightning" add constraint "lightning_document_id_fkey" FOREIGN KEY (document_id) REFERENCES document(id) ON DELETE CASCADE not valid;
 
 alter table "public"."lightning" validate constraint "lightning_document_id_fkey";
@@ -328,27 +310,6 @@ alter table "public"."login_log" add constraint "login_log_admin_id_key" UNIQUE 
 alter table "public"."time_signature" add constraint "time_signature_document_id_fkey" FOREIGN KEY (document_id) REFERENCES document(id) ON DELETE CASCADE not valid;
 
 alter table "public"."time_signature" validate constraint "time_signature_document_id_fkey";
-
-set check_function_bodies = off;
-
-CREATE OR REPLACE FUNCTION public.get_operator()
- RETURNS TABLE(id integer, photo text, first_name text, last_name text, last_login timestamp without time zone, role text, is_active boolean)
- LANGUAGE sql
- SECURITY DEFINER
-AS $function$
-  select
-    a.id,
-    a.photo,
-    a.first_name,
-    a.last_name,
-    u.last_sign_in_at as last_login,
-    a.role,
-    (u.last_sign_in_at > now() - interval '3 months') as is_active
-  from admin a
-  join auth.users u on a.user_id = u.id
-  where a.role = 'operator' and a.user_id = auth.uid();
-$function$
-;
 
 grant delete on table "public"."activity_log" to "anon";
 
@@ -1063,48 +1024,6 @@ grant trigger on table "public"."time_signature" to "service_role";
 grant truncate on table "public"."time_signature" to "service_role";
 
 grant update on table "public"."time_signature" to "service_role";
-
-grant delete on table "public"."weather_data" to "anon";
-
-grant insert on table "public"."weather_data" to "anon";
-
-grant references on table "public"."weather_data" to "anon";
-
-grant select on table "public"."weather_data" to "anon";
-
-grant trigger on table "public"."weather_data" to "anon";
-
-grant truncate on table "public"."weather_data" to "anon";
-
-grant update on table "public"."weather_data" to "anon";
-
-grant delete on table "public"."weather_data" to "authenticated";
-
-grant insert on table "public"."weather_data" to "authenticated";
-
-grant references on table "public"."weather_data" to "authenticated";
-
-grant select on table "public"."weather_data" to "authenticated";
-
-grant trigger on table "public"."weather_data" to "authenticated";
-
-grant truncate on table "public"."weather_data" to "authenticated";
-
-grant update on table "public"."weather_data" to "authenticated";
-
-grant delete on table "public"."weather_data" to "service_role";
-
-grant insert on table "public"."weather_data" to "service_role";
-
-grant references on table "public"."weather_data" to "service_role";
-
-grant select on table "public"."weather_data" to "service_role";
-
-grant trigger on table "public"."weather_data" to "service_role";
-
-grant truncate on table "public"."weather_data" to "service_role";
-
-grant update on table "public"."weather_data" to "service_role";
 
 grant delete on table "public"."wind_direction_and_speed" to "anon";
 
