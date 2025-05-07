@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class MaxTemperatureQueryDto {
-  @ApiProperty({ example: 1, description: 'ID data temperatur maksimal' })
+export class AverageTemperatureQueryDto {
+  @ApiProperty({ example: 1, description: 'ID data temperatur rata rata' })
   id: number;
 
   @ApiProperty({

@@ -6,7 +6,7 @@ export class SunshineDurationQueryDto {
 
   @ApiProperty({
     example: 'user123',
-    description: 'User ID yang melakukan update',
+    description: 'User ID dari admin atau operator yang menjadi pelaku aksi',
   })
   user_id: string;
 }

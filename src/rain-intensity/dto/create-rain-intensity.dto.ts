@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateRainIntensityDto {
-  @ApiProperty({ description: 'ID admin atau operator', example: '1' })
   @IsNotEmpty()
   @IsString()
   user_id: string;

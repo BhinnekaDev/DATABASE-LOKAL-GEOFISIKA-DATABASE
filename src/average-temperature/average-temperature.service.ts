@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import { ActivityLogService } from '@/activity-log/activity-log.service';
-import { EditMinTemperatureDto } from '@/min-temperature/dto/edit-min-temperature.dto';
-import { CreateMinTemperatureDto } from '@/min-temperature/dto/create-min-temperature.dto';
+import { EditAverageTemperatureDto } from '@/average-temperature/dto/edit-average-temperature.dto';
+import { CreateAverageTemperatureDto } from '@/average-temperature/dto/create-average-temperature.dto';
 
 dotenv.config();
 
 @Injectable()
-export class MinTemperatureService {
+export class AverageTemperatureService {
   private supabase: SupabaseClient;
 
   constructor(
@@ -45,14 +45,26 @@ export class MinTemperatureService {
   }
 
   /**
-   * Menyimpan data temperatur minimal dan mencatat ke activity log
+   * Menyimpan data temperatur rata rata dan mencatat ke activity log
    */
-  async saveMinTemperature(
-    dto: CreateMinTemperatureDto,
+  async saveAverageTemperature(
+    dto: CreateAverageTemperatureDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, date, min_temperature } = dto;
+    const {
+      user_id,
+      avg_temperature_07,
+      avg_temperature_13,
+      avg_temperature_18,
+    } = dto;
+
+    const avg_temperature = parseFloat(
+      (
+        (avg_temperature_07 + avg_temperature_13 + avg_temperature_18) /
+        3
+      ).toFixed(2),
+    );
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -67,18 +79,25 @@ export class MinTemperatureService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Simpan data temperatur minimal
-    const { data: insertedMinTemperature, error: minTemperatureError } =
+    // 2. Simpan data temperatur rata rata
+    const { data: insertedAvgTemperature, error: insertError } =
       await this.supabase
-        .from('min_temperature')
-        .insert({ date, min_temperature })
+        .from('average_temperature')
+        .insert([
+          {
+            avg_temperature,
+            avg_temperature_07,
+            avg_temperature_13,
+            avg_temperature_18,
+          },
+        ])
         .select();
 
-    if (minTemperatureError) {
+    if (insertError) {
       return {
         success: false,
-        message: 'Gagal menyimpan data temperatur minimal',
-        error: minTemperatureError,
+        message: 'Gagal menyimpan data temperatur rata rata',
+        error: insertError,
       };
     }
 
@@ -89,8 +108,8 @@ export class MinTemperatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Temperatur Minimal',
-      description: `${namaAdmin} menambahkan data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
+      action: 'Menambahkan Data Temperatur Rata-Rata',
+      description: `${namaAdmin} menambahkan data temperatur rata-rata sebesar ${avg_temperature}°C, yang diukur pada pukul ${avg_temperature_07}, ${avg_temperature_13}, dan ${avg_temperature_18}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -98,20 +117,33 @@ export class MinTemperatureService {
 
     return {
       success: true,
-      message: 'Berhasil menyimpan data temperatur minimal',
-      data: insertedMinTemperature,
+      message: 'Berhasil menyimpan data temperatur rata rata',
+      data: insertedAvgTemperature,
     };
   }
 
   /**
-   * Mengubah data temperatur minimal dan mencatat ke activity log
+   * Mengubah data temperatur rata rata dan mencatat ke activity log
    */
-  async updateMinTemperature(
-    dto: EditMinTemperatureDto,
+  async updateAverageTemperature(
+    dto: EditAverageTemperatureDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id, user_id, date, min_temperature } = dto;
+    const {
+      id,
+      user_id,
+      avg_temperature_07,
+      avg_temperature_13,
+      avg_temperature_18,
+    } = dto;
+
+    const avg_temperature = parseFloat(
+      (
+        (avg_temperature_07 + avg_temperature_13 + avg_temperature_18) /
+        3
+      ).toFixed(2),
+    );
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -126,19 +158,24 @@ export class MinTemperatureService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Update data temperatur minimal berdasarkan id
-    const { data: updatedMinTemperature, error: minTemperatureError } =
+    // 2. Update data temperatur rata rata berdasarkan id
+    const { data: updatedAvgTemperature, error: updateError } =
       await this.supabase
-        .from('min_temperature')
-        .update({ min_temperature, date })
+        .from('average_temperature')
+        .update({
+          avg_temperature,
+          avg_temperature_07,
+          avg_temperature_13,
+          avg_temperature_18,
+        })
         .eq('id', id)
         .select();
 
-    if (minTemperatureError) {
+    if (updateError) {
       return {
         success: false,
-        message: 'Gagal mengubah data temperatur minimal',
-        error: minTemperatureError,
+        message: 'Gagal mengubah data temperatur rata rata',
+        error: updateError,
       };
     }
 
@@ -149,8 +186,8 @@ export class MinTemperatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah Data Temperatur Minimal',
-      description: `${namaAdmin} mengubah data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
+      action: 'Mengubah Data Temperatur Rata-Rata',
+      description: `${namaAdmin} mengubah data temperatur rata-rata sebesar ${avg_temperature}°C, yang diukur pada pukul ${avg_temperature_07}, ${avg_temperature_13}, dan ${avg_temperature_18}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -158,15 +195,15 @@ export class MinTemperatureService {
 
     return {
       success: true,
-      message: 'Berhasil mengubah data temperatur minimal',
-      data: updatedMinTemperature,
+      message: 'Berhasil mengubah data temperatur rata rata',
+      data: updatedAvgTemperature,
     };
   }
 
   /**
-   * Menghapus data temperatur minimal dan mencatat ke activity log
+   * Menghapus data temperatur rata rata dan mencatat ke activity log
    */
-  async deleteMinTemperature(
+  async deleteAverageTemperature(
     id: number,
     user_id: string,
     ipAddress: string,
@@ -185,35 +222,40 @@ export class MinTemperatureService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil data temperatur minimal (untuk log)
-    const { data: minTemperatureData, error: getMintemperatureError } =
+    // 2. Ambil data temperatur rata rata (untuk log)
+    const { data: avgTemperatureData, error: getAvgTemperatureError } =
       await this.supabase
-        .from('min_temperature')
+        .from('average_temperature')
         .select('*')
         .eq('id', id)
         .single();
 
-    if (getMintemperatureError) {
+    if (getAvgTemperatureError) {
       return {
         success: false,
-        message: 'Gagal mengambil data temperatur minimal',
-        error: getMintemperatureError,
+        message: 'Gagal mengambil data temperatur rata rata',
+        error: getAvgTemperatureError,
       };
     }
 
-    const { min_temperature, date } = minTemperatureData;
+    const {
+      avg_temperature,
+      avg_temperature_07,
+      avg_temperature_13,
+      avg_temperature_18,
+    } = avgTemperatureData;
 
-    // 3. Hapus data temperatur minimal berdasarkan id
-    const { error: minTemperatureError } = await this.supabase
-      .from('min_temperature')
+    // 3. Hapus data temperatur rata rata berdasarkan id
+    const { error: deleteError } = await this.supabase
+      .from('average_temperature')
       .delete()
       .eq('id', id);
 
-    if (minTemperatureError) {
+    if (deleteError) {
       return {
         success: false,
-        message: 'Gagal menghapus data temperatur minimal',
-        error: minTemperatureError,
+        message: 'Gagal menghapus data temperatur rata rata',
+        error: deleteError,
       };
     }
 
@@ -224,8 +266,8 @@ export class MinTemperatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus Data Temperatur Minimal',
-      description: `${namaAdmin} menghapus data temperatur minimal dengan nilai ${min_temperature} untuk tanggal ${date}`,
+      action: 'Menghapus Data Temperatur Rata-Rata',
+      description: `${namaAdmin} menghapus data temperatur rata-rata sebesar ${avg_temperature}°C, yang diukur pada pukul ${avg_temperature_07}, ${avg_temperature_13}, dan ${avg_temperature_18}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -233,40 +275,40 @@ export class MinTemperatureService {
 
     return {
       success: true,
-      message: 'Berhasil menghapus data temperatur minimal',
-      data: minTemperatureData,
+      message: 'Berhasil menghapus data temperatur rata rata',
+      data: avgTemperatureData,
     };
   }
 
   /**
-   * Mengambil semua data temperatur minimal
+   * Mengambil semua data temperatur rata rata
    */
-  async getAllMinTemperature() {
+  async getAllAverageTemperature() {
     const { data, error } = await this.supabase
-      .from('min_temperature')
+      .from('average_temperature')
       .select('*');
 
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data temperatur minimal',
+        message: 'Gagal mengambil data temperatur rata rata',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil semua data temperatur minimal',
+      message: 'Berhasil mengambil semua data temperatur rata rata',
       data: data,
     };
   }
 
   /**
-   * Mengambil semua data temperatur minimal berdasarkan id
+   * Mengambil semua data temperatur rata rata berdasarkan id
    */
-  async getMinTemperatureById(id: number) {
+  async getAverageTemperatureById(id: number) {
     const { data, error } = await this.supabase
-      .from('min_temperature')
+      .from('average_temperature')
       .select('*')
       .eq('id', id)
       .single();
@@ -274,14 +316,14 @@ export class MinTemperatureService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data temperatur minimal berdasarkan id',
+        message: 'Gagal mengambil data temperatur rata rata berdasarkan id',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data temperatur minimal berdasarkan id',
+      message: 'Berhasil mengambil data temperatur rata rata berdasarkan id',
       data,
     };
   }

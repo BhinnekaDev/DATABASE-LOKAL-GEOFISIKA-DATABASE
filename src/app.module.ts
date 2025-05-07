@@ -17,6 +17,7 @@ import { RainIntensityModule } from '@/rain-intensity/rain-intensity.module';
 import { MaxTemperatureModule } from '@/max-temperature/max-temperature.module';
 import { MinTemperatureModule } from '@/min-temperature/min-temperature.module';
 import { SunshineDurationModule } from '@/sunshine-duration/sunshine-duration.module';
+import { AverageTemperatureModule } from '@/average-temperature/average-temperature.module';
 
 const moduleFeatures = [
   AuthModule,
@@ -33,6 +34,7 @@ const moduleFeatures = [
   MaxTemperatureModule,
   MinTemperatureModule,
   SunshineDurationModule,
+  AverageTemperatureModule,
 ];
 
 @Module({
