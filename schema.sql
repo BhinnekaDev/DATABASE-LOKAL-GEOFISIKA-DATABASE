@@ -57,8 +57,10 @@ create table "public"."admin" (
 
 create table "public"."air_pressure" (
     "id" integer not null default nextval('air_pressure_id_seq'::regclass),
-    "id_weather_data" integer,
-    "air_pressure" double precision
+    "air_pressure" double precision,
+    "air_pressure_07" double precision,
+    "air_pressure_13" double precision,
+    "air_pressure_18" double precision
 );
 
 
@@ -100,8 +102,10 @@ create table "public"."evaporation" (
 
 create table "public"."humidity" (
     "id" integer not null default nextval('humidity_id_seq'::regclass),
-    "id_weather_data" integer,
-    "avg_humidity" double precision
+    "avg_humidity" double precision,
+    "humidity_07" double precision,
+    "humidity_13" double precision,
+    "humidity_18" double precision
 );
 
 
@@ -307,17 +311,9 @@ alter table "public"."admin" validate constraint "admin_user_id_fkey";
 
 alter table "public"."admin" add constraint "admin_user_id_unique" UNIQUE using index "admin_user_id_unique";
 
-alter table "public"."air_pressure" add constraint "air_pressure_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
-
-alter table "public"."air_pressure" validate constraint "air_pressure_id_weather_data_fkey";
-
 alter table "public"."average_temperature" add constraint "average_temperature_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
 
 alter table "public"."average_temperature" validate constraint "average_temperature_id_weather_data_fkey";
-
-alter table "public"."humidity" add constraint "humidity_id_weather_data_fkey" FOREIGN KEY (id_weather_data) REFERENCES weather_data(id) not valid;
-
-alter table "public"."humidity" validate constraint "humidity_id_weather_data_fkey";
 
 alter table "public"."lightning" add constraint "lightning_document_id_fkey" FOREIGN KEY (document_id) REFERENCES document(id) ON DELETE CASCADE not valid;
 
