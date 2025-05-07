@@ -255,7 +255,7 @@ export class EvaporationService {
 
     return {
       success: true,
-      message: 'Berhasil mengambil semua data evaporation',
+      message: 'Berhasil mengambil semua data penguapan',
       data: data,
     };
   }

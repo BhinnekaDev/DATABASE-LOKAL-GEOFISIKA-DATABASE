@@ -89,7 +89,7 @@ export class RainIntensityService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan data intensitas hujan',
+      action: 'Menambahkan Data Intensitas Hujan',
       description: `${namaAdmin} menambahkan data intensitas hujan dengan nama ${name} untuk tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,

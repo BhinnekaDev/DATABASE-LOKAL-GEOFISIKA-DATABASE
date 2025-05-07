@@ -111,7 +111,7 @@ export class EarthquakeService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Menambahkan Data Gempa',
-      description: `${namaAdmin} berhasil menambahkan data gempa dengan tingkat intensitas ${mmi}, terdeteksi pada koordinat (${latitude}, ${longitude}), dengan kedalaman ${depth} km.`,
+      description: `${namaAdmin} menambahkan data gempa dengan tingkat intensitas ${mmi}, terdeteksi pada koordinat (${latitude}, ${longitude}), dengan kedalaman ${depth} km.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
