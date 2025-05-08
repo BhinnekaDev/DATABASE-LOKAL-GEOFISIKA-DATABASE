@@ -5,14 +5,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
+import { EditLightningDto } from '@/lightning/dto/edit-lightning.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
-import { EditTimeSignatureDto } from '@/time-signature/dto/edit-time-signature.dto';
-import { CreateTimeSignatureDto } from '@/time-signature/dto/create-time-signature.dto';
+import { CreateLightningDto } from '@/lightning/dto/create-lightning.dto';
 
 dotenv.config();
 
 @Injectable()
-export class TimeSignatureService {
+export class LightningService {
   private supabase: SupabaseClient;
 
   constructor(
@@ -47,10 +47,10 @@ export class TimeSignatureService {
   }
 
   /**
-   * Menyimpan data tanda waktu dan mencatat ke activity log
+   * Menyimpan data petir dan mencatat ke activity log
    */
-  async saveTimeSignature(
-    dto: CreateTimeSignatureDto,
+  async saveLightning(
+    dto: CreateLightningDto,
     ipAddress: string,
     userAgent: string,
   ) {
@@ -71,7 +71,7 @@ export class TimeSignatureService {
 
     // 2. Unggah ke Supabase Storage
     const fileName = `${uuidv4()}.jpg`;
-    const bucketName = 'time-signatures';
+    const bucketName = 'lightning';
 
     // Convert base64 ke Buffer
     const base64Data = file_base64.replace(/^data:image\/\w+;base64,/, '');
@@ -98,10 +98,10 @@ export class TimeSignatureService {
       .from(bucketName)
       .getPublicUrl(fileName);
 
-    // 4. Simpan data tanda waktu
-    const { data: timeSignatureDataInserted, error: insertError } =
+    // 4. Simpan data petir
+    const { data: lightningDataInserted, error: insertError } =
       await this.supabase
-        .from('time_signature')
+        .from('lightning')
         .insert({
           name,
           date,
@@ -113,7 +113,7 @@ export class TimeSignatureService {
     if (insertError) {
       return {
         success: false,
-        message: 'Gagal menyimpan data tanda waktu',
+        message: 'Gagal menyimpan data petir',
         error: insertError,
       };
     }
@@ -125,8 +125,8 @@ export class TimeSignatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menambahkan Data Tanda Waktu',
-      description: `${namaAdmin} menambahkan tanda waktu dengan nama ${name} untuk tanggal ${date}.`,
+      action: 'Menambahkan Data Petir',
+      description: `${namaAdmin} menambahkan data petir dengan nama ${name} untuk tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -134,17 +134,17 @@ export class TimeSignatureService {
 
     return {
       success: true,
-      message: 'Berhasil menyimpan data tanda waktu dan mengunggah gambar',
-      data: timeSignatureDataInserted,
+      message: 'Berhasil menyimpan data petir dan mengunggah gambar',
+      data: lightningDataInserted,
     };
   }
 
   /**
-   * Mengubah data tanda waktu, mengupload file baru (jika ada) serta menghapus file lama di Supabase Storage
+   * Mengubah data petir, mengupload file baru (jika ada) serta menghapus file lama di Supabase Storage
    * dan mencatat ke activity log.
    */
-  async updateTimeSignature(
-    dto: EditTimeSignatureDto,
+  async updateLightning(
+    dto: EditLightningDto,
     ipAddress: string,
     userAgent: string,
   ) {
@@ -163,30 +163,29 @@ export class TimeSignatureService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil data tanda waktu saat ini
-    const { data: timeSignatureData, error: timeSignatureError } =
-      await this.supabase
-        .from('time_signature')
-        .select('*')
-        .eq('id', id)
-        .single();
+    // 2. Ambil data petir saat ini
+    const { data: lightningData, error: lightningError } = await this.supabase
+      .from('lightning')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-    if (timeSignatureError || !timeSignatureData) {
+    if (lightningError || !lightningData) {
       return {
         success: false,
-        message: 'Data tanda waktu tidak ditemukan',
-        error: timeSignatureError,
+        message: 'Data petir tidak ditemukan',
+        error: lightningError,
       };
     }
 
-    const bucketName = 'time-signatures';
-    let newFileUrl = timeSignatureData.file_url;
+    const bucketName = 'lightning';
+    let newFileUrl = lightningData.file_url;
 
     // 3. Jika terdapat file baru, hapus file lama dan upload file baru
     if (file_base64) {
       // Jika file_url sudah ada, hapus file lama dari storage
-      if (timeSignatureData.file_url) {
-        const parts = timeSignatureData.file_url.split('/');
+      if (lightningData.file_url) {
+        const parts = lightningData.file_url.split('/');
         const oldFileName = parts[parts.length - 1];
 
         await this.supabase.storage.from(bucketName).remove([oldFileName]);
@@ -220,9 +219,9 @@ export class TimeSignatureService {
       newFileUrl = publicUrlData.publicUrl;
     }
 
-    // 4. Update data tanda waktu berdasarkan id
+    // 4. Update data petir berdasarkan id
     const { data: updatedRecord, error: updateError } = await this.supabase
-      .from('time_signature')
+      .from('lightning')
       .update({
         name,
         date,
@@ -235,7 +234,7 @@ export class TimeSignatureService {
     if (updateError) {
       return {
         success: false,
-        message: 'Gagal mengubah data tanda waktu',
+        message: 'Gagal mengubah data petir',
         error: updateError,
       };
     }
@@ -247,8 +246,8 @@ export class TimeSignatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Mengubah Data Tanda Waktu',
-      description: `${namaAdmin} mengubah data tanda waktu dengan nama ${name} untuk tanggal ${date}.`,
+      action: 'Mengubah Data Petir',
+      description: `${namaAdmin} mengubah data petir dengan nama ${name} untuk tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -256,17 +255,16 @@ export class TimeSignatureService {
 
     return {
       success: true,
-      message:
-        'Berhasil mengubah data tanda waktu dan mengupdate file pada storage',
+      message: 'Berhasil mengubah data petir dan mengupdate file pada storage',
       data: updatedRecord,
     };
   }
 
   /**
-   * Menghapus data tanda waktu, hapus file baru (jika ada) di Supabase Storage
+   * Menghapus data petir, hapus file baru (jika ada) di Supabase Storage
    * dan mencatat ke activity log.
    */
-  async deleteTimeSignature(
+  async deleteLightning(
     id: number,
     user_id: string,
     ipAddress: string,
@@ -285,28 +283,28 @@ export class TimeSignatureService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Ambil data tanda waktu untuk mendapatkan file_url
-    const { data: timeSignatureData, error: getDataError } = await this.supabase
-      .from('time_signature')
+    // 2. Ambil data petir untuk mendapatkan file_url
+    const { data: lightningData, error: getDataError } = await this.supabase
+      .from('lightning')
       .select('*')
       .eq('id', id)
       .single();
 
-    if (getDataError || !timeSignatureData) {
+    if (getDataError || !lightningData) {
       return {
         success: false,
-        message: 'Data tanda waktu tidak ditemukan',
+        message: 'Data petir tidak ditemukan',
         error: getDataError,
       };
     }
 
-    const { name, date } = timeSignatureData;
+    const { name, date } = lightningData;
 
-    const bucketName = 'time-signatures';
+    const bucketName = 'lightning';
 
     // 3. Hapus file dari storage jika ada file_url
-    if (timeSignatureData.file_url) {
-      const parts = timeSignatureData.file_url.split('/');
+    if (lightningData.file_url) {
+      const parts = lightningData.file_url.split('/');
       const fileName = parts[parts.length - 1];
 
       const { error: deleteFileError } = await this.supabase.storage
@@ -322,9 +320,9 @@ export class TimeSignatureService {
       }
     }
 
-    // 4. Hapus data dari tabel tanda waktu
+    // 4. Hapus data dari tabel petir
     const { data: deletedData, error: deleteError } = await this.supabase
-      .from('time_signature')
+      .from('lightning')
       .delete()
       .eq('id', id)
       .select()
@@ -333,7 +331,7 @@ export class TimeSignatureService {
     if (deleteError) {
       return {
         success: false,
-        message: 'Gagal menghapus data tanda waktu dari database',
+        message: 'Gagal menghapus data petir dari database',
         error: deleteError,
       };
     }
@@ -345,8 +343,8 @@ export class TimeSignatureService {
 
     await this.activityLogService.logActivity({
       admin_id: user_id,
-      action: 'Menghapus Data Tanda Waktu',
-      description: `${namaAdmin} menghapus data tanda waktu dengan nama ${name} untuk tanggal ${date}.`,
+      action: 'Menghapus Data Petir',
+      description: `${namaAdmin} menghapus data petir dengan nama ${name} untuk tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -354,40 +352,38 @@ export class TimeSignatureService {
 
     return {
       success: true,
-      message: 'Berhasil menghapus data tanda waktu dan file terkait',
+      message: 'Berhasil menghapus data petir dan file terkait',
       data: deletedData,
     };
   }
 
   /**
-   * Mengambil semua data tanda waktu
+   * Mengambil semua data petir
    */
-  async getAllTimeSignature() {
-    const { data, error } = await this.supabase
-      .from('time_signature')
-      .select('*');
+  async getAllLightning() {
+    const { data, error } = await this.supabase.from('lightning').select('*');
 
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data tanda waktu',
+        message: 'Gagal mengambil data petir',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil semua data tanda waktu',
+      message: 'Berhasil mengambil semua data petir',
       data: data,
     };
   }
 
   /**
-   * Mengambil semua data tanda waktu berdasarkan id
+   * Mengambil semua data petir berdasarkan id
    */
-  async getTimeSignatureById(id: number) {
+  async getLightningById(id: number) {
     const { data, error } = await this.supabase
-      .from('time_signature')
+      .from('lightning')
       .select('*')
       .eq('id', id)
       .single();
@@ -395,14 +391,14 @@ export class TimeSignatureService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data tanda waktu berdasarkan id',
+        message: 'Gagal mengambil data petir berdasarkan id',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data tanda waktu berdasarkan id',
+      message: 'Berhasil mengambil data petir berdasarkan id',
       data,
     };
   }

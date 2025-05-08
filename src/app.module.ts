@@ -8,6 +8,7 @@ import { AdminModule } from '@/admin/admin.module';
 import { HumidityModule } from '@/humidity/humidity.module';
 import { RainfallModule } from '@/rainfall/rainfall.module';
 import { LoginLogModule } from '@/login-log/login-log.module';
+import { LightningModule } from '@/lightning/lightning.module';
 import { RainyDaysModule } from '@/rainy-days/rainy-days.module';
 import { EarthquakeModule } from '@/earthquake/earthquake.module';
 import { EvaporationModule } from '@/evaporation/evaporation.module';
@@ -27,11 +28,13 @@ const moduleFeatures = [
   RainfallModule,
   HumidityModule,
   RainyDaysModule,
+  LightningModule,
   EarthquakeModule,
   EvaporationModule,
   ActivityLogModule,
   AirPressureModule,
   RainIntensityModule,
+  TimeSignatureModule,
   MaxTemperatureModule,
   MinTemperatureModule,
   SunshineDurationModule,
@@ -39,11 +42,7 @@ const moduleFeatures = [
 ];
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    ...moduleFeatures,
-    TimeSignatureModule,
-  ],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), ...moduleFeatures],
   controllers: [AppController],
   providers: [AppService],
 })

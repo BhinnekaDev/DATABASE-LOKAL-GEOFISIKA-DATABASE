@@ -6,8 +6,6 @@ create sequence "public"."air_pressure_id_seq";
 
 create sequence "public"."average_temperature_id_seq";
 
-create sequence "public"."document_id_seq";
-
 create sequence "public"."earthquake_id_seq";
 
 create sequence "public"."evaporation_id_seq";
@@ -69,14 +67,6 @@ create table "public"."average_temperature" (
 );
 
 
-create table "public"."document" (
-    "id" integer not null default nextval('document_id_seq'::regclass),
-    "file_path" text,
-    "document_date" date,
-    "document_name" text
-);
-
-
 create table "public"."earthquake" (
     "id" integer not null default nextval('earthquake_id_seq'::regclass),
     "date" date,
@@ -109,7 +99,9 @@ create table "public"."humidity" (
 
 create table "public"."lightning" (
     "id" integer not null default nextval('lightning_id_seq'::regclass),
-    "document_id" integer
+    "name" text,
+    "date" date,
+    "file_url" text
 );
 
 
@@ -171,8 +163,6 @@ create table "public"."time_signature" (
 );
 
 
-alter table "public"."time_signature" enable row level security;
-
 create table "public"."wind_direction_and_speed" (
     "id" integer not null default nextval('wind_direction_and_speed_id_seq'::regclass),
     "max_wind_speed" double precision,
@@ -186,8 +176,6 @@ alter sequence "public"."admin_id_seq" owned by "public"."admin"."id";
 alter sequence "public"."air_pressure_id_seq" owned by "public"."air_pressure"."id";
 
 alter sequence "public"."average_temperature_id_seq" owned by "public"."average_temperature"."id";
-
-alter sequence "public"."document_id_seq" owned by "public"."document"."id";
 
 alter sequence "public"."earthquake_id_seq" owned by "public"."earthquake"."id";
 
@@ -220,8 +208,6 @@ CREATE UNIQUE INDEX admin_user_id_unique ON public.admin USING btree (user_id);
 CREATE UNIQUE INDEX air_pressure_pkey ON public.air_pressure USING btree (id);
 
 CREATE UNIQUE INDEX average_temperature_pkey ON public.average_temperature USING btree (id);
-
-CREATE UNIQUE INDEX document_pkey ON public.document USING btree (id);
 
 CREATE UNIQUE INDEX earthquake_pkey ON public.earthquake USING btree (id);
 
@@ -256,8 +242,6 @@ alter table "public"."admin" add constraint "admin_pkey" PRIMARY KEY using index
 alter table "public"."air_pressure" add constraint "air_pressure_pkey" PRIMARY KEY using index "air_pressure_pkey";
 
 alter table "public"."average_temperature" add constraint "average_temperature_pkey" PRIMARY KEY using index "average_temperature_pkey";
-
-alter table "public"."document" add constraint "document_pkey" PRIMARY KEY using index "document_pkey";
 
 alter table "public"."earthquake" add constraint "earthquake_pkey" PRIMARY KEY using index "earthquake_pkey";
 
@@ -296,10 +280,6 @@ alter table "public"."admin" add constraint "admin_user_id_fkey" FOREIGN KEY (us
 alter table "public"."admin" validate constraint "admin_user_id_fkey";
 
 alter table "public"."admin" add constraint "admin_user_id_unique" UNIQUE using index "admin_user_id_unique";
-
-alter table "public"."lightning" add constraint "lightning_document_id_fkey" FOREIGN KEY (document_id) REFERENCES document(id) ON DELETE CASCADE not valid;
-
-alter table "public"."lightning" validate constraint "lightning_document_id_fkey";
 
 alter table "public"."login_log" add constraint "login_log_admin_id_fkey" FOREIGN KEY (admin_id) REFERENCES admin(user_id) ON UPDATE CASCADE ON DELETE CASCADE not valid;
 
@@ -474,48 +454,6 @@ grant trigger on table "public"."average_temperature" to "service_role";
 grant truncate on table "public"."average_temperature" to "service_role";
 
 grant update on table "public"."average_temperature" to "service_role";
-
-grant delete on table "public"."document" to "anon";
-
-grant insert on table "public"."document" to "anon";
-
-grant references on table "public"."document" to "anon";
-
-grant select on table "public"."document" to "anon";
-
-grant trigger on table "public"."document" to "anon";
-
-grant truncate on table "public"."document" to "anon";
-
-grant update on table "public"."document" to "anon";
-
-grant delete on table "public"."document" to "authenticated";
-
-grant insert on table "public"."document" to "authenticated";
-
-grant references on table "public"."document" to "authenticated";
-
-grant select on table "public"."document" to "authenticated";
-
-grant trigger on table "public"."document" to "authenticated";
-
-grant truncate on table "public"."document" to "authenticated";
-
-grant update on table "public"."document" to "authenticated";
-
-grant delete on table "public"."document" to "service_role";
-
-grant insert on table "public"."document" to "service_role";
-
-grant references on table "public"."document" to "service_role";
-
-grant select on table "public"."document" to "service_role";
-
-grant trigger on table "public"."document" to "service_role";
-
-grant truncate on table "public"."document" to "service_role";
-
-grant update on table "public"."document" to "service_role";
 
 grant delete on table "public"."earthquake" to "anon";
 
