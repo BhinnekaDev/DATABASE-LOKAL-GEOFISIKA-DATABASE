@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditEvaporationDto } from '@/evaporation/dto/edit-evaporation.dto';
 import { CreateEvaporationDto } from '@/evaporation/dto/create-evaporation.dto';
+import { FilterEvaporationByDateDto } from '@/evaporation/dto/filterEvaporationByDateDto';
 
 dotenv.config();
 
@@ -281,6 +282,33 @@ export class EvaporationService {
     return {
       success: true,
       message: 'Berhasil mengambil data penguapan berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data penguapan berdasarkan rentang tanggal
+   */
+  async getEvaporationByDate(dto: FilterEvaporationByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('evaporation')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data penguapan berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil data penguapan berdasarkan rentang tanggal',
       data,
     };
   }

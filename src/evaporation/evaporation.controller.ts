@@ -16,6 +16,7 @@ import { EditEvaporationDto } from '@/evaporation/dto/edit-evaporation.dto';
 import { EvaporationQueryDto } from '@/evaporation/dto/qevaporationQueryDto';
 import { CreateEvaporationDto } from '@/evaporation/dto/create-evaporation.dto';
 import { GetEvaporationQueryDto } from '@/evaporation/dto/getEvaporationQueryDto';
+import { FilterEvaporationByDateDto } from '@/evaporation/dto/filterEvaporationByDateDto';
 
 @ApiTags('Evaporation')
 @Controller('evaporation')
@@ -80,7 +81,7 @@ export class EvaporationController {
     );
   }
 
-  //   Route untuk ambil semua data evaporation
+  // Route untuk ambil semua data evaporation
   @ApiOkResponse({ description: 'Berhasil mendapatkan semua data penguapan' })
   @Get('/get-all')
   async getAllEvaporation() {
@@ -95,5 +96,15 @@ export class EvaporationController {
   async getEvaporationById(@Query() querys: GetEvaporationQueryDto) {
     const result = await this.evaporationService.getEvaporationById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data penguapan berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data penguapan berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getEvaporationByDate(@Query() query: FilterEvaporationByDateDto) {
+    return await this.evaporationService.getEvaporationByDate(query);
   }
 }
