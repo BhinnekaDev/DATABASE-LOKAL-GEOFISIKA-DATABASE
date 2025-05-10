@@ -16,6 +16,7 @@ import { RainfallQueryDto } from '@/rainfall/dto/rainfallQueryDto';
 import { EditRainfallDto } from '@/rainfall/dto/edit-rainfall.dto';
 import { CreateRainfallDto } from '@/rainfall/dto/create-rainfall.dto';
 import { GetRainfallQueryDto } from '@/rainfall/dto/getRainfallQueryDto';
+import { FilterRainfallByDateDto } from '@/rainfall/dto/filterRainfallByDateDto';
 
 @ApiTags('Rainfall')
 @Controller('rainfall')
@@ -98,5 +99,15 @@ export class RainfallController {
   async getRainfallById(@Query() querys: GetRainfallQueryDto) {
     const result = await this.rainfallService.getRainfallById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data curah hujan berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data curah hujan berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getRainfallByDate(@Query() query: FilterRainfallByDateDto) {
+    return await this.rainfallService.getRainfallByDate(query);
   }
 }

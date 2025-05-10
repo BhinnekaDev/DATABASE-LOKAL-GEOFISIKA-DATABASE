@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditRainfallDto } from '@/rainfall/dto/edit-rainfall.dto';
 import { CreateRainfallDto } from '@/rainfall/dto/create-rainfall.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
+import { FilterRainfallByDateDto } from '@/rainfall/dto/filterRainfallByDateDto';
 
 dotenv.config();
 
@@ -278,6 +279,33 @@ export class RainfallService {
     return {
       success: true,
       message: 'Berhasil mengambil data curah hujan berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data curah hujan berdasarkan tanggal
+   */
+  async getRainfallByDate(dto: FilterRainfallByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('rainfall')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data curah hujan berdasarkan tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil data curah hujan berdasarkan tanggal',
       data,
     };
   }
