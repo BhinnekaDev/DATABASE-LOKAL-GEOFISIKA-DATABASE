@@ -16,6 +16,7 @@ import { AirPressureQueryDto } from '@/air-pressure/dto/airPressureQueryDto';
 import { EditAirPressureDto } from '@/air-pressure/dto/edit-air-pressure.dto';
 import { CreateAirPressureDto } from '@/air-pressure/dto/create-air-pressure.dto';
 import { GetAirPressureQueryDto } from '@/air-pressure/dto/getAirPressureQueryDto';
+import { FilterAirPressureByAirPressureDto } from '@/air-pressure/dto/filterAirPressureByDateDto';
 
 @ApiTags('Air Pressure')
 @Controller('air-pressure')
@@ -99,5 +100,17 @@ export class AirPressureController {
   async getAirPressure(@Query() querys: GetAirPressureQueryDto) {
     const result = await this.airPressureService.getAirPressureById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data tekanan udara berdasarkan rentang tekanan udara
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data tekanan udara berdasarkan rentang tekanan udara',
+  })
+  @Get('/get-by-air-pressure')
+  async getAirPressureByAirPressure(
+    @Query() query: FilterAirPressureByAirPressureDto,
+  ) {
+    return await this.airPressureService.getAirPressureByAirPressure(query);
   }
 }

@@ -1,20 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsNumber } from 'class-validator';
 
 export class FilterHumidityByAverageDto {
   @ApiProperty({
     description: 'Nilai rata rata pada awal kelembapan',
-    example: '10',
+    example: 10,
   })
   @IsOptional()
-  @IsString()
-  start_average_humidity?: string;
+  @IsNumber()
+  start_average_humidity?: number;
 
   @ApiProperty({
     description: 'Nilai rata rata pada akhir kelembapan',
-    example: '100',
+    example: 100,
   })
   @IsOptional()
-  @IsString()
-  end_average_humidity?: string;
+  @IsNumber()
+  end_average_humidity?: number;
 }
