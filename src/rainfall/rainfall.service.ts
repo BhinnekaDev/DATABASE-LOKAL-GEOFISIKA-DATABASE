@@ -284,7 +284,7 @@ export class RainfallService {
   }
 
   /**
-   * Mengambil data curah hujan berdasarkan tanggal
+   * Mengambil data curah hujan berdasarkan rentang tanggal
    */
   async getRainfallByDate(dto: FilterRainfallByDateDto) {
     const { start_date, end_date } = dto;
@@ -298,14 +298,15 @@ export class RainfallService {
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data curah hujan berdasarkan tanggal',
+        message: 'Gagal mengambil data curah hujan berdasarkan rentang tanggal',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data curah hujan berdasarkan tanggal',
+      message:
+        'Berhasil mengambil data curah hujan berdasarkan rentang tanggal',
       data,
     };
   }

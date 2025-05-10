@@ -16,6 +16,7 @@ import { HumidityQueryDto } from '@/humidity/dto/humidityQueryDto';
 import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
 import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { GetHumidityQueryDto } from '@/humidity/dto/getHumidityQueryDto';
+import { FilterHumidityByDateDto } from '@/humidity/dto/filterHumidityByDateDto';
 
 @ApiTags('Humidity')
 @Controller('humidity')
@@ -94,5 +95,15 @@ export class HumidityController {
   async getHumidityById(@Query() querys: GetHumidityQueryDto) {
     const result = await this.humidityService.getHumidityById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data kelembapan berdasarkan rentang rata rata kelembapan
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data kelembapan berdasarkan rentang rata rata kelembapan',
+  })
+  @Get('/get-by-average')
+  async getHumidityByDate(@Query() query: FilterHumidityByDateDto) {
+    return await this.humidityService.getHumidityByDate(query);
   }
 }

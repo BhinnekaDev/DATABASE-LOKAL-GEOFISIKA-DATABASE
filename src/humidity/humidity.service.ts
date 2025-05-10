@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
 import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
+import { FilterHumidityByDateDto } from '@/humidity/dto/filterHumidityByDateDto';
 
 dotenv.config();
 
@@ -298,6 +299,35 @@ export class HumidityService {
     return {
       success: true,
       message: 'Berhasil mengambil data kelembapan berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data kelembapan berdasarkan rentang rata rata kelembapan
+   */
+  async getHumidityByDate(dto: FilterHumidityByDateDto) {
+    const { start_average_humidity, end_average_humidity } = dto;
+
+    const { data, error } = await this.supabase
+      .from('humidity')
+      .select('*')
+      .gte('avg_humidity', start_average_humidity)
+      .lte('avg_humidity', end_average_humidity);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message:
+          'Gagal mengambil data kelembapan berdasarkan rentang rata rata kelembapan',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        'Berhasil mengambil data kelembapan berdasarkan rentang rata rata kelembapan',
       data,
     };
   }
