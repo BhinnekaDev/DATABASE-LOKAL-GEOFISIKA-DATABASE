@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditMinTemperatureDto } from '@/min-temperature/dto/edit-min-temperature.dto';
 import { CreateMinTemperatureDto } from '@/min-temperature/dto/create-min-temperature.dto';
+import { FilterMinTemperatureByDateDto } from '@/min-temperature/dto/filterMinTemperatureByDateDto';
 
 dotenv.config();
 
@@ -282,6 +283,35 @@ export class MinTemperatureService {
     return {
       success: true,
       message: 'Berhasil mengambil data temperatur minimal berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data teratur minimal berdasarkan rentang tanggal
+   */
+  async getMinTemperatureByDate(dto: FilterMinTemperatureByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('min_temperature')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message:
+          'Gagal mengambil data temperatur minimal berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        'Berhasil mengambil data temperatur minimal berdasarkan rentang tanggal',
       data,
     };
   }

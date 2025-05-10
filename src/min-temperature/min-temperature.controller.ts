@@ -16,6 +16,7 @@ import { MinTemperatureQueryDto } from '@/min-temperature/dto/minTemperatureQuer
 import { EditMinTemperatureDto } from '@/min-temperature/dto/edit-min-temperature.dto';
 import { CreateMinTemperatureDto } from '@/min-temperature/dto/create-min-temperature.dto';
 import { GetMinTemperatureQueryDto } from '@/min-temperature/dto/getMinTemperatureQueryDto';
+import { FilterMinTemperatureByDateDto } from '@/min-temperature/dto/filterMinTemperatureByDateDto';
 
 @ApiTags('Min Temperatue')
 @Controller('min-temperature')
@@ -103,5 +104,15 @@ export class MinTemperatureController {
       querys.id,
     );
     return result;
+  }
+
+  // Route untuk ambil data temperatur minimal berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data temperatur minimal berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getMinTemperatureByDate(@Query() query: FilterMinTemperatureByDateDto) {
+    return await this.minTemperatureService.getMinTemperatureByDate(query);
   }
 }
