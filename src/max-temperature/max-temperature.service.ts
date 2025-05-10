@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditMaxTemperatureDto } from '@/max-temperature/dto/edit-max-temperature.dto';
 import { CreateMaxTemperatureDto } from '@/max-temperature/dto/create-max-temperature.dto';
+import { FilterMaxTemperatureByDateDto } from '@/max-temperature/dto/filterMaxTemperatureByDateDto';
 
 dotenv.config();
 
@@ -289,6 +290,35 @@ export class MaxTemperatureService {
     return {
       success: true,
       message: 'Berhasil mengambil data temperatur maksimal berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data temperatur maksimal berdasarkan rentang tanggal
+   */
+  async getMaxTemperatureByDate(dto: FilterMaxTemperatureByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('max_temperature')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message:
+          'Gagal mengambil data temperatur maksimal berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        'Berhasil mengambil data temperatur maksimal berdasarkan rentang tanggal',
       data,
     };
   }

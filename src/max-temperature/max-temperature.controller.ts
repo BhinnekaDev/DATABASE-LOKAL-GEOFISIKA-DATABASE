@@ -16,6 +16,7 @@ import { MaxTemperatureQueryDto } from '@/max-temperature/dto/maxTemperatureQuer
 import { EditMaxTemperatureDto } from '@/max-temperature/dto/edit-max-temperature.dto';
 import { CreateMaxTemperatureDto } from '@/max-temperature/dto/create-max-temperature.dto';
 import { GetMaxTemperatureQueryDto } from '@/max-temperature/dto/getMaxTemperatureQueryDto';
+import { FilterMaxTemperatureByDateDto } from '@/max-temperature/dto/filterMaxTemperatureByDateDto';
 
 @ApiTags('Max Temperature')
 @Controller('max-temperature')
@@ -104,5 +105,15 @@ export class MaxTemperatureController {
       querys.id,
     );
     return result;
+  }
+
+  // Route untuk ambil data temperatur maksimal berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data temperatur maksimal berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getMaxTemperatureByDate(@Query() query: FilterMaxTemperatureByDateDto) {
+    return await this.maxTemperatureService.getMaxTemperatureByDate(query);
   }
 }
