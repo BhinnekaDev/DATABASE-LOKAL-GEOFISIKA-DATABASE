@@ -8,6 +8,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditLightningDto } from '@/lightning/dto/edit-lightning.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateLightningDto } from '@/lightning/dto/create-lightning.dto';
+import { FilterLightningByDateDto } from '@/lightning/dto/filterLightningByDateDto';
 
 dotenv.config();
 
@@ -399,6 +400,33 @@ export class LightningService {
     return {
       success: true,
       message: 'Berhasil mengambil data petir berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data petir berdasarkan rentang tanggal
+   */
+  async getLightningByDate(dto: FilterLightningByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('lightning')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data petir berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil data petir berdasarkan rentang tanggal',
       data,
     };
   }

@@ -16,6 +16,7 @@ import { LightningQueryDto } from '@/lightning/dto/lightningQueryDto';
 import { EditLightningDto } from '@/lightning/dto/edit-lightning.dto';
 import { CreateLightningDto } from '@/lightning/dto/create-lightning.dto';
 import { GetLightningQueryDto } from '@/lightning/dto/getLightningQueryDto';
+import { FilterLightningByDateDto } from '@/lightning/dto/filterLightningByDateDto';
 
 @ApiTags('Lightning')
 @Controller('lightning')
@@ -101,5 +102,14 @@ export class LightningController {
   async getLightning(@Query() querys: GetLightningQueryDto) {
     const result = await this.lightningService.getLightningById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data petir berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan data petir berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getLightningByDate(@Query() query: FilterLightningByDateDto) {
+    return await this.lightningService.getLightningByDate(query);
   }
 }
