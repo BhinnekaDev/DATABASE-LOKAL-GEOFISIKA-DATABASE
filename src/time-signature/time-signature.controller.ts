@@ -16,6 +16,7 @@ import { TimeSignatureQueryDto } from '@/time-signature/dto/timeSignatureQueryDt
 import { EditTimeSignatureDto } from '@/time-signature/dto/edit-time-signature.dto';
 import { CreateTimeSignatureDto } from '@/time-signature/dto/create-time-signature.dto';
 import { GetTimeSignatureQueryDto } from '@/time-signature/dto/getTimeSignatureQueryDto';
+import { FilterTimeSignatureByDateDto } from '@/time-signature/dto/filterTimeSignatureByDateDto';
 
 @ApiTags('Time Signature')
 @Controller('time-signature')
@@ -103,5 +104,15 @@ export class TimeSignatureController {
       querys.id,
     );
     return result;
+  }
+
+  // Route untuk ambil data tanda waktu berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data tanda waktu berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getTimeSignatureByDate(@Query() query: FilterTimeSignatureByDateDto) {
+    return await this.timeSignatureService.getTimeSignatureByDate(query);
   }
 }

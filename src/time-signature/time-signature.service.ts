@@ -8,6 +8,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditTimeSignatureDto } from '@/time-signature/dto/edit-time-signature.dto';
 import { CreateTimeSignatureDto } from '@/time-signature/dto/create-time-signature.dto';
+import { FilterTimeSignatureByDateDto } from '@/time-signature/dto/filterTimeSignatureByDateDto';
 
 dotenv.config();
 
@@ -403,6 +404,34 @@ export class TimeSignatureService {
     return {
       success: true,
       message: 'Berhasil mengambil data tanda waktu berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data tanda waktu berdasarkan rentang tanggal
+   */
+  async getTimeSignatureByDate(dto: FilterTimeSignatureByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('time_signature')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data tanda waktu berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        'Berhasil mengambil data tanda waktu berdasarkan rentang tanggal',
       data,
     };
   }
