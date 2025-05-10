@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditEarthquakeDto } from '@/earthquake/dto/edit-earthquake.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateEarthquakeDto } from '@/earthquake/dto/create-earthquake.dto';
+import { FilterEarthquakeByDateDto } from '@/earthquake/dto/filterEarthquakeByDateDto';
 
 dotenv.config();
 
@@ -321,6 +322,33 @@ export class EarthquakeService {
     return {
       success: true,
       message: 'Berhasil mengambil data gempa berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data gempa berdasarkan rentang tanggal
+   */
+  async getEarthquakeByDate(dto: FilterEarthquakeByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('earthquake')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data gempa berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil data gempa berdasarkan rentang tanggal',
       data,
     };
   }

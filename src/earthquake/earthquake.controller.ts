@@ -16,6 +16,7 @@ import { EarthquakeQueryDto } from '@/earthquake/dto/earthquakeQueryDto';
 import { EditEarthquakeDto } from '@/earthquake/dto/edit-earthquake.dto';
 import { CreateEarthquakeDto } from '@/earthquake/dto/create-earthquake.dto';
 import { GetEarthquakeQueryDto } from '@/earthquake/dto/getEarthquakeQueryDto';
+import { FilterEarthquakeByDateDto } from '@/earthquake/dto/filterEarthquakeByDateDto';
 
 @ApiTags('Earthquake')
 @Controller('earthquake')
@@ -101,5 +102,14 @@ export class EarthquakeController {
   async getEarthquakeById(@Query() querys: GetEarthquakeQueryDto) {
     const result = await this.earthquakeService.getEarthquakeById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data gempa berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan data gempa berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getEarthquakeByDate(@Query() query: FilterEarthquakeByDateDto) {
+    return await this.earthquakeService.getEarthquakeByDate(query);
   }
 }
