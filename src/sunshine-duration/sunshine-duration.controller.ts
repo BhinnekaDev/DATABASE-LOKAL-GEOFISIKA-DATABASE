@@ -16,6 +16,7 @@ import { SunshineDurationQueryDto } from '@/sunshine-duration/dto/sunshineDurati
 import { EditSunshineDurationDto } from '@/sunshine-duration/dto/edit-sunshine-duration.dto';
 import { CreateSunshineDurationDto } from '@/sunshine-duration/dto/create-sunshine-duration.dto';
 import { GetSunshineDurationQueryDto } from '@/sunshine-duration/dto/getSunshineDurationQueryDto';
+import { FilterSunShineDurationByDateDto } from '@/sunshine-duration/dto/filterSunShineDurationByDateDto';
 
 @ApiTags('Sunshine Duration')
 @Controller('sunshine-duration')
@@ -108,5 +109,17 @@ export class SunshineDurationController {
       querys.id,
     );
     return result;
+  }
+
+  // Route untuk ambil data durasi matahari terbit berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data durasi matahari terbit berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getSunshineDurationByDate(
+    @Query() query: FilterSunShineDurationByDateDto,
+  ) {
+    return await this.sunshineDurationService.getSunshineDurationByDate(query);
   }
 }

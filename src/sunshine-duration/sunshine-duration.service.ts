@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditSunshineDurationDto } from '@/sunshine-duration/dto/edit-sunshine-duration.dto';
 import { CreateSunshineDurationDto } from '@/sunshine-duration/dto/create-sunshine-duration.dto';
+import { FilterSunShineDurationByDateDto } from '@/sunshine-duration/dto/filterSunShineDurationByDateDto';
 
 dotenv.config();
 
@@ -282,6 +283,35 @@ export class SunshineDurationService {
     return {
       success: true,
       message: 'Berhasil mengambil data durasi matahari terbit berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data durasi matahari terbit berdasarkan rentang tanggal
+   */
+  async getSunshineDurationByDate(dto: FilterSunShineDurationByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('sunshine_duration')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message:
+          'Gagal mengambil data durasi matahari terbit berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        'Berhasil mengambil data durasi matahari terbit berdasarkan rentang tanggal',
       data,
     };
   }
