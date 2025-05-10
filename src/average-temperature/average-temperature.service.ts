@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditAverageTemperatureDto } from '@/average-temperature/dto/edit-average-temperature.dto';
 import { CreateAverageTemperatureDto } from '@/average-temperature/dto/create-average-temperature.dto';
+import { FilterAverageTemperatureByAverageTemperatureDto } from './dto/filterAverageTemperatureByAverageTemperatureDto';
 
 dotenv.config();
 
@@ -324,6 +325,37 @@ export class AverageTemperatureService {
     return {
       success: true,
       message: 'Berhasil mengambil data temperatur rata rata berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data temperatur rata rata berdasarkan rentang temperatur rata rata
+   */
+  async getAverageTemperatureByAverageTemperature(
+    dto: FilterAverageTemperatureByAverageTemperatureDto,
+  ) {
+    const { start_average_temperature, end_average_temperature } = dto;
+
+    const { data, error } = await this.supabase
+      .from('average_temperature')
+      .select('*')
+      .gte('avg_temperature', start_average_temperature)
+      .lte('avg_temperature', end_average_temperature);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message:
+          'Gagal mengambil data temperatur rata rata berdasarkan rentang temperatur rata rata',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        'Berhasil mengambil data temperatur rata rata berdasarkan rentang temperatur rata rata',
       data,
     };
   }

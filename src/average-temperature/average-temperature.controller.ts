@@ -16,6 +16,7 @@ import { AverageTemperatureQueryDto } from '@/average-temperature/dto/averageTem
 import { EditAverageTemperatureDto } from '@/average-temperature/dto/edit-average-temperature.dto';
 import { CreateAverageTemperatureDto } from '@/average-temperature/dto/create-average-temperature.dto';
 import { GetAverageTemperatureQueryDto } from '@/average-temperature/dto/getAverageTemperatureQueryDto';
+import { FilterAverageTemperatureByAverageTemperatureDto } from '@/average-temperature/dto/filterAverageTemperatureByAverageTemperatureDto';
 
 @ApiTags('Average Temperature')
 @Controller('average-temperature')
@@ -111,5 +112,19 @@ export class AverageTemperatureController {
     const result =
       await this.averageTemperatureService.getAverageTemperatureById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data temperatur rata rata berdasarkan rentang temperatur rata rata
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data temperatur rata rata berdasarkan rentang temperatur rata rata',
+  })
+  @Get('/get-by-average-temperature')
+  async getAverageTemperatureByAverageTemperature(
+    @Query() query: FilterAverageTemperatureByAverageTemperatureDto,
+  ) {
+    return await this.averageTemperatureService.getAverageTemperatureByAverageTemperature(
+      query,
+    );
   }
 }
