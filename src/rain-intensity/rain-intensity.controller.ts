@@ -16,6 +16,7 @@ import { RainIntensityQueryDto } from '@/rain-intensity/dto/rainIntensityQueryDt
 import { EditRainIntensityDto } from '@/rain-intensity/dto/edit-rain-intensity.dto';
 import { CreateRainIntensityDto } from '@/rain-intensity/dto/create-rain-intensity.dto';
 import { GetRainIntensityQueryDto } from '@/rain-intensity/dto/getRainIntensityQueryDto';
+import { FilterRainIntensityByDateDto } from '@/rain-intensity/dto/filterRainIntensityByDateDto';
 
 @ApiTags('Rain Intensity')
 @Controller('rain-intensity')
@@ -103,5 +104,15 @@ export class RainIntensityController {
       querys.id,
     );
     return result;
+  }
+
+  // Route untuk ambil data intensitas hujan berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data intensitas hujan berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getRainIntensityByDate(@Query() query: FilterRainIntensityByDateDto) {
+    return await this.rainIntensityService.getRainIntensityByDate(query);
   }
 }

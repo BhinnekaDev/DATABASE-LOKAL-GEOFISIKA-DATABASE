@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditRainIntensityDto } from '@/rain-intensity/dto/edit-rain-intensity.dto';
 import { CreateRainIntensityDto } from '@/rain-intensity/dto/create-rain-intensity.dto';
+import { FilterRainIntensityByDateDto } from '@/rain-intensity/dto/filterRainIntensityByDateDto';
 
 dotenv.config();
 
@@ -282,6 +283,35 @@ export class RainIntensityService {
     return {
       success: true,
       message: 'Berhasil mengambil data intensitas hujan berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data intensitas hujan berdasarkan rentang tanggal
+   */
+  async getRainIntensityByDate(dto: FilterRainIntensityByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('rain_intensity')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message:
+          'Gagal mengambil data intensitas hujan berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message:
+        'Berhasil mengambil data intensitas hujan berdasarkan rentang tanggal',
       data,
     };
   }
