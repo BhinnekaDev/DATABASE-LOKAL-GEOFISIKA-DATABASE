@@ -6,7 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
 import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
-import { FilterHumidityByDateDto } from '@/humidity/dto/filterHumidityByDateDto';
+import { FilterHumidityByAverageDto } from '@/humidity/dto/filterHumidityByAverageDto';
 
 dotenv.config();
 
@@ -306,7 +306,7 @@ export class HumidityService {
   /**
    * Mengambil data kelembapan berdasarkan rentang rata rata kelembapan
    */
-  async getHumidityByDate(dto: FilterHumidityByDateDto) {
+  async getHumidityByAverage(dto: FilterHumidityByAverageDto) {
     const { start_average_humidity, end_average_humidity } = dto;
 
     const { data, error } = await this.supabase

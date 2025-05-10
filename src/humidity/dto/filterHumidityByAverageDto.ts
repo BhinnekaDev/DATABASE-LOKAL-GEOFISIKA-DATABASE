@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class FilterHumidityByDateDto {
+export class FilterHumidityByAverageDto {
   @ApiProperty({
     description: 'Nilai rata rata pada awal kelembapan',
     example: '10',

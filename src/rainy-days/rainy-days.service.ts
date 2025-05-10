@@ -6,6 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditRainyDaysDto } from '@/rainy-days/dto/edit-rainy-days.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateRainyDaysDto } from '@/rainy-days/dto/create-rainy-days.dto';
+import { FilterRainyDaysByDateDto } from '@/rainy-days/dto/filterRainyDaysByDateDto';
 
 dotenv.config();
 
@@ -276,6 +277,33 @@ export class RainyDaysService {
     return {
       success: true,
       message: 'Berhasil mengambil data hari hujan berdasarkan id',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data hari hujan berdasarkan rentang tanggal
+   */
+  async getRainyDaysByDate(dto: FilterRainyDaysByDateDto) {
+    const { start_date, end_date } = dto;
+
+    const { data, error } = await this.supabase
+      .from('rainy_days')
+      .select('*')
+      .gte('date', start_date)
+      .lte('date', end_date);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data hari hujan berdasarkan rentang tanggal',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil data hari hujan berdasarkan rentang tanggal',
       data,
     };
   }

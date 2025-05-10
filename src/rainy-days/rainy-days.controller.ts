@@ -16,6 +16,7 @@ import { RainyDaysQueryDto } from '@/rainy-days/dto/rainyDaysQueryDto';
 import { EditRainyDaysDto } from '@/rainy-days/dto/edit-rainy-days.dto';
 import { CreateRainyDaysDto } from '@/rainy-days/dto/create-rainy-days.dto';
 import { GetRainyDaysQueryDto } from '@/rainy-days/dto/getRainyDaysQueryDto';
+import { FilterRainyDaysByDateDto } from '@/rainy-days/dto/filterRainyDaysByDateDto';
 
 @ApiTags('Rainy Days')
 @Controller('rainy-days')
@@ -95,5 +96,15 @@ export class RainyDaysController {
   async getRainyDaysById(@Query() querys: GetRainyDaysQueryDto) {
     const result = await this.rainyDaysService.getRainyDaysById(querys.id);
     return result;
+  }
+
+  // Route untuk ambil data hari hujan berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description:
+      'Berhasil mendapatkan data hari hujan berdasarkan rentang tanggal',
+  })
+  @Get('/get-by-date')
+  async getRainyDaysByDate(@Query() query: FilterRainyDaysByDateDto) {
+    return await this.rainyDaysService.getRainyDaysByDate(query);
   }
 }

@@ -16,7 +16,7 @@ import { HumidityQueryDto } from '@/humidity/dto/humidityQueryDto';
 import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
 import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { GetHumidityQueryDto } from '@/humidity/dto/getHumidityQueryDto';
-import { FilterHumidityByDateDto } from '@/humidity/dto/filterHumidityByDateDto';
+import { FilterHumidityByAverageDto } from '@/humidity/dto/filterHumidityByAverageDto';
 
 @ApiTags('Humidity')
 @Controller('humidity')
@@ -103,7 +103,7 @@ export class HumidityController {
       'Berhasil mendapatkan data kelembapan berdasarkan rentang rata rata kelembapan',
   })
   @Get('/get-by-average')
-  async getHumidityByDate(@Query() query: FilterHumidityByDateDto) {
-    return await this.humidityService.getHumidityByDate(query);
+  async getHumidityByAverage(@Query() query: FilterHumidityByAverageDto) {
+    return await this.humidityService.getHumidityByAverage(query);
   }
 }
