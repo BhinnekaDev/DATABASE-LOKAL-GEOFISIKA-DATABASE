@@ -1,4 +1,6 @@
+import { Buffer } from 'buffer';
 import * as dotenv from 'dotenv';
+import { v4 as uuidv4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -88,7 +90,7 @@ export class AdminService {
       password,
       first_name,
       last_name,
-      photo,
+      file_base64,
       role,
     } = updateAdminDto;
 
@@ -119,6 +121,39 @@ export class AdminService {
       throw new BadRequestException(
         'Gagal memperbarui data pengguna di Supabase Auth.',
       );
+    }
+
+    const bucketName = 'admin';
+    let photo = userData.photo;
+
+    if (file_base64) {
+      // Hapus file lama jika ada
+      if (userData.photo) {
+        const oldFilePath = userData.photo.split('/').pop();
+        await this.supabase.storage.from(bucketName).remove([oldFilePath]);
+      }
+
+      // Upload file baru
+      const newFileName = `${uuidv4()}.jpg`;
+      const base64Data = file_base64.replace(/^data:image\/\w+;base64,/, '');
+      const fileBuffer = Buffer.from(base64Data, 'base64');
+
+      const { error: uploadError } = await this.supabase.storage
+        .from(bucketName)
+        .upload(newFileName, fileBuffer, {
+          contentType: 'image/jpeg',
+        });
+
+      if (uploadError) {
+        throw new BadRequestException('Gagal mengunggah foto baru ke storage.');
+      }
+
+      // Ambil URL publik
+      const { data: publicUrlData } = this.supabase.storage
+        .from(bucketName)
+        .getPublicUrl(newFileName);
+
+      photo = publicUrlData.publicUrl;
     }
 
     // Perbarui data admin di tabel `admin`
@@ -188,6 +223,8 @@ export class AdminService {
     ip_address: string,
     user_agent: string,
   ): Promise<DeleteResponse> {
+    const bucketName = 'admin';
+
     // Cek keberadaan user
     const { data: userData, error: fetchError } = await this.supabase
       .from('admin')
@@ -197,6 +234,12 @@ export class AdminService {
 
     if (fetchError || !userData) {
       throw new BadRequestException('User tidak ditemukan.');
+    }
+
+    // Hapus file foto dari storage jika ada
+    if (userData.photo) {
+      const fileName = userData.photo.split('/').pop();
+      await this.supabase.storage.from(bucketName).remove([fileName]);
     }
 
     // Ambil data admin yang melakukan penghapusan
@@ -211,7 +254,6 @@ export class AdminService {
     // Format waktu
     const timeZone = 'Asia/Jakarta';
     const date = new Date();
-
     const formattedCreatedAt = this.timeHelperService.formatCreatedAt(
       date,
       timeZone,

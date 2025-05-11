@@ -1,4 +1,6 @@
+import { Buffer } from 'buffer';
 import * as dotenv from 'dotenv';
+import { v4 as uuidv4 } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -80,7 +82,8 @@ export class AuthService {
     ip_address: string,
     user_agent: string,
   ): Promise<SignUpResponse> {
-    const { email, password, first_name, last_name, photo, role } = registerDto;
+    const { email, password, first_name, last_name, file_base64, role } =
+      registerDto;
 
     const fullName = `${first_name} ${last_name}`;
 
@@ -119,13 +122,40 @@ export class AuthService {
 
     await this.activityLogService.logActivity({
       admin_id: id_role,
-      action: 'Mendaftarkan Admin Atau Operator', 
-      description: `${firstNameFromDB} ${lastNameFromDB} Mendaftarkan ${first_name} ${last_name} dengan email ${email}`,
+      action: 'Mendaftarkan Admin Atau Operator',
+      description: `${firstNameFromDB} ${lastNameFromDB} mendaftarkan ${first_name} ${last_name} dengan email ${email}`,
       ip_address,
       user_agent,
       created_at: formattedCreatedAt,
     });
 
+    // Upload file ke storage
+    const fileName = `${uuidv4()}.jpg`;
+    const bucketName = 'admin';
+    const base64Data = file_base64.replace(/^data:image\/\w+;base64,/, '');
+    const fileBuffer = Buffer.from(base64Data, 'base64');
+
+    const { error: uploadError } = await this.supabase.storage
+      .from(bucketName)
+      .upload(fileName, fileBuffer, {
+        contentType: 'image/jpeg',
+        upsert: true,
+      });
+
+    if (uploadError) {
+      throw new BadRequestException(
+        'Gagal mengunggah foto ke storage: ' + uploadError.message,
+      );
+    }
+
+    // Ambil public URL file
+    const { data: publicUrlData } = this.supabase.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
+
+    const photo = publicUrlData.publicUrl;
+
+    // Simpan ke tabel admin
     const { data: dbData, error: dbError } = await this.supabase
       .from('admin')
       .insert([
