@@ -17,6 +17,7 @@ import { EditEarthquakeDto } from '@/earthquake/dto/edit-earthquake.dto';
 import { CreateEarthquakeDto } from '@/earthquake/dto/create-earthquake.dto';
 import { GetEarthquakeQueryDto } from '@/earthquake/dto/getEarthquakeQueryDto';
 import { FilterEarthquakeByDateDto } from '@/earthquake/dto/filterEarthquakeByDateDto';
+import { CreateEarthquakeParseDto } from '@/earthquake/dto/create-earthquake-parse.dto';
 
 @ApiTags('Earthquake')
 @Controller('earthquake')
@@ -36,6 +37,27 @@ export class EarthquakeController {
     dto.user_id = userId;
 
     const result = await this.earthquakeService.saveEarthquake(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menambah data gempa dengan parsing
+  @Post('/insert-parse')
+  async saveEarthquakeParse(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateEarthquakeParseDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.earthquakeService.saveEarthquakeParse(
       dto,
       ipAddress,
       userAgent,

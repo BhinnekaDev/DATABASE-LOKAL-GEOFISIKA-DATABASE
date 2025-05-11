@@ -7,6 +7,7 @@ import { EditEarthquakeDto } from '@/earthquake/dto/edit-earthquake.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateEarthquakeDto } from '@/earthquake/dto/create-earthquake.dto';
 import { FilterEarthquakeByDateDto } from '@/earthquake/dto/filterEarthquakeByDateDto';
+import { CreateEarthquakeParseDto } from '@/earthquake/dto/create-earthquake-parse.dto';
 
 dotenv.config();
 
@@ -43,6 +44,71 @@ export class EarthquakeService {
     }
 
     return { success: true, data };
+  }
+
+  /**
+   * Mengubah format string input menjadi objek Earthquake
+   */
+  private parseEarthquakeInput(input: string) {
+    const regex =
+      /Mag:([\d.]+),\s(\d{2}-[a-zA-Z]{3}-\d{2})\s(\d{2}:\d{2}:\d{2})\sWIB,\sLok:([\d.]+)\sLS\s-\s([\d.]+)\sBT\s\((\d+)\skm\s([^)]+)\),\sKedlmn:\s(\d+)KM\s::([A-Z]+)/;
+
+    const matches = input.match(regex);
+
+    if (!matches) {
+      throw new Error('Format input tidak valid');
+    }
+
+    const magnitude = parseFloat(matches[1]);
+    const date = this.parseDate(matches[2]);
+    const time = matches[3];
+    const latitude = parseFloat(matches[4].replace(',', '.'));
+    const longitude = parseFloat(matches[5].replace(',', '.'));
+    const depth = parseInt(matches[8], 10);
+    const description = matches[7].trim();
+    const observer_name = matches[9].trim();
+
+    return {
+      magnitude,
+      date,
+      time,
+      latitude,
+      longitude,
+      depth,
+      description,
+      observer_name,
+    };
+  }
+
+  /**
+   * Mengubah format string tanggal menjadi objek Date
+   */
+  private parseDate(dateStr: string): Date {
+    // Contoh format: 13-mar-25
+    const [day, month, year] = dateStr.split('-');
+    const months = [
+      'jan',
+      'feb',
+      'mar',
+      'apr',
+      'mei',
+      'jun',
+      'jul',
+      'agu',
+      'sep',
+      'okt',
+      'nov',
+      'des',
+    ];
+    const monthIndex = months.indexOf(month.toLowerCase());
+
+    if (monthIndex === -1) {
+      throw new Error('Bulan tidak valid');
+    }
+
+    const fullYear = 2000 + parseInt(year, 10);
+
+    return new Date(fullYear, monthIndex, parseInt(day, 10));
   }
 
   /**
@@ -113,6 +179,86 @@ export class EarthquakeService {
       admin_id: user_id,
       action: 'Menambahkan Data Gempa',
       description: `${namaAdmin} menambahkan data gempa dengan tingkat intensitas ${mmi}, terdeteksi pada koordinat (${latitude}, ${longitude}), dengan kedalaman ${depth} km.`,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      created_at: createdAt,
+    });
+
+    return {
+      success: true,
+      message: 'Berhasil menyimpan data gempa',
+      data: insertedEarthquake,
+    };
+  }
+
+  /**
+   * Menyimpan data gempa dengan parsing dan mencatat ke activity log
+   */
+  async saveEarthquakeParse(
+    dto: CreateEarthquakeParseDto,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    const { input, user_id } = dto;
+
+    // 1. Ambil data admin
+    const adminResponse = await this.getAdminData(user_id);
+    if (!adminResponse.success || !adminResponse.data) {
+      return {
+        success: false,
+        message: 'Data admin tidak ditemukan',
+        error: adminResponse.error,
+      };
+    }
+
+    const { first_name, last_name } = adminResponse.data;
+    const namaAdmin = `${first_name} ${last_name}`;
+
+    // 2. Parsing inputan
+    const {
+      magnitude,
+      date,
+      time,
+      latitude,
+      longitude,
+      depth,
+      description,
+      observer_name,
+    } = this.parseEarthquakeInput(input);
+
+    // 3. Simpan data gempa
+    const { data: insertedEarthquake, error: earthquakeError } =
+      await this.supabase
+        .from('earthquake')
+        .insert({
+          date,
+          time,
+          magnitude,
+          description,
+          depth,
+          latitude,
+          longitude,
+          observer_name,
+        })
+        .select();
+
+    if (earthquakeError || !insertedEarthquake) {
+      return {
+        success: false,
+        message: 'Gagal menyimpan data gempa',
+        error: earthquakeError ? earthquakeError.message : 'Unknown error',
+      };
+    }
+
+    // 4. Mencatat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    await this.activityLogService.logActivity({
+      admin_id: user_id,
+      action: 'Menambahkan Data Gempa',
+      description: `${namaAdmin} menambahkan data gempa dengan tingkat intensitas ${magnitude}, terdeteksi pada koordinat (${latitude}, ${longitude}), dengan kedalaman ${depth} km.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
