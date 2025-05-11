@@ -16,6 +16,7 @@ import { RainfallQueryDto } from '@/rainfall/dto/rainfallQueryDto';
 import { EditRainfallDto } from '@/rainfall/dto/edit-rainfall.dto';
 import { CreateRainfallDto } from '@/rainfall/dto/create-rainfall.dto';
 import { GetRainfallQueryDto } from '@/rainfall/dto/getRainfallQueryDto';
+import { CreateRainfallExcelDto } from '@/rainfall/dto/create-rainfall-excel.dto';
 import { FilterRainfallByDateDto } from '@/rainfall/dto/filterRainfallByDateDto';
 
 @ApiTags('Rainfall')
@@ -36,6 +37,27 @@ export class RainfallController {
     dto.user_id = userId;
 
     const result = await this.rainfallService.saveRainfall(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel curah hujan
+  @Post('/insert-excel')
+  async saveRainfallExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateRainfallExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.rainfallService.saveExcelRainfall(
       dto,
       ipAddress,
       userAgent,
