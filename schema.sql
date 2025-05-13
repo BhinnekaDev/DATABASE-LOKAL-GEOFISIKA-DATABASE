@@ -54,7 +54,8 @@ create table "public"."air_pressure" (
     "air_pressure" double precision,
     "air_pressure_07" double precision,
     "air_pressure_13" double precision,
-    "air_pressure_18" double precision
+    "air_pressure_18" double precision,
+    "date" date
 );
 
 
@@ -93,7 +94,8 @@ create table "public"."humidity" (
     "avg_humidity" double precision,
     "humidity_07" double precision,
     "humidity_13" double precision,
-    "humidity_18" double precision
+    "humidity_18" double precision,
+    "date" date
 );
 
 
