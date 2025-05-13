@@ -29,4 +29,12 @@ export class CreateAverageTemperatureDto {
   @IsNotEmpty()
   @IsNumber()
   avg_temperature_18: number;
+
+  @ApiProperty({
+    description: 'Tanggal',
+    example: '2025-05-05',
+  })
+  @IsNotEmpty()
+  @IsString()
+  date: string;
 }

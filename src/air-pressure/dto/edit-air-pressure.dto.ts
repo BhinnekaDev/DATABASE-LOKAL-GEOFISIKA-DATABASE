@@ -40,7 +40,7 @@ export class EditAirPressureDto {
   air_pressure_18: number;
 
   @ApiProperty({
-    description: 'Tanggal untuk tekanan udara',
+    description: 'Tanggal',
     example: '2025-01-01',
   })
   @IsNotEmpty()

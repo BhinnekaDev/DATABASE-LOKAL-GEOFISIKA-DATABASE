@@ -64,7 +64,8 @@ create table "public"."average_temperature" (
     "avg_temperature" double precision,
     "avg_temperature_07" double precision,
     "avg_temperature_13" double precision,
-    "avg_temperature_18" double precision
+    "avg_temperature_18" double precision,
+    "date" date
 );
 
 

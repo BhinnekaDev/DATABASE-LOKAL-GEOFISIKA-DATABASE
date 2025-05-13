@@ -53,7 +53,7 @@ export class HumidityService {
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, humidity_07, humidity_13, humidity_18 } = dto;
+    const { user_id, humidity_07, humidity_13, humidity_18, date } = dto;
 
     const avg_humidity = parseFloat(
       ((humidity_07 + humidity_13 + humidity_18) / 3).toFixed(2),
@@ -80,6 +80,7 @@ export class HumidityService {
         humidity_07,
         humidity_13,
         humidity_18,
+        date,
       })
       .select()
       .single();
@@ -121,7 +122,7 @@ export class HumidityService {
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id, user_id, humidity_07, humidity_13, humidity_18 } = dto;
+    const { id, user_id, humidity_07, humidity_13, humidity_18, date } = dto;
 
     const avg_humidity = parseFloat(
       ((humidity_07 + humidity_13 + humidity_18) / 3).toFixed(2),
@@ -148,6 +149,7 @@ export class HumidityService {
         humidity_07,
         humidity_13,
         humidity_18,
+        date,
       })
       .eq('id', id)
       .select()

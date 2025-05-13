@@ -24,4 +24,9 @@ export class EditHumidityDto {
   @IsNotEmpty()
   @IsNumber()
   humidity_18: number;
+
+  @ApiProperty({ description: 'Tanggal', example: '2025-05-05' })
+  @IsNotEmpty()
+  @IsString()
+  date: string;
 }

@@ -58,6 +58,7 @@ export class AverageTemperatureService {
       avg_temperature_07,
       avg_temperature_13,
       avg_temperature_18,
+      date,
     } = dto;
 
     const avg_temperature = parseFloat(
@@ -90,8 +91,10 @@ export class AverageTemperatureService {
             avg_temperature_07,
             avg_temperature_13,
             avg_temperature_18,
+            date,
           },
         ])
+
         .select();
 
     if (insertError) {
@@ -137,6 +140,7 @@ export class AverageTemperatureService {
       avg_temperature_07,
       avg_temperature_13,
       avg_temperature_18,
+      date,
     } = dto;
 
     const avg_temperature = parseFloat(
@@ -168,6 +172,7 @@ export class AverageTemperatureService {
           avg_temperature_07,
           avg_temperature_13,
           avg_temperature_18,
+          date,
         })
         .eq('id', id)
         .select();
