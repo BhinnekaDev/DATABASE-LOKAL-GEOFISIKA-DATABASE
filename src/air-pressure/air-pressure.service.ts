@@ -59,6 +59,7 @@ export class AirPressureService {
       air_pressure_07,
       air_pressure_13,
       air_pressure_18,
+      date,
     } = dto;
 
     // 1. Ambil data admin
@@ -83,6 +84,7 @@ export class AirPressureService {
           air_pressure_07,
           air_pressure_13,
           air_pressure_18,
+          date,
         })
         .select()
         .single();
@@ -103,7 +105,7 @@ export class AirPressureService {
     await this.activityLogService.logActivity({
       admin_id: user_id,
       action: 'Menambahkan Data Tekanan Udara',
-      description: `${namaAdmin} menambahkan data tekanan udara sebesar ${air_pressure}, dengan rincian: 07.00 = ${air_pressure_07}, 13.00 = ${air_pressure_13}, 18.00 = ${air_pressure_18}.`,
+      description: `${namaAdmin} menambahkan data tekanan udara sebesar ${air_pressure}, dengan rincian: 07.00 = ${air_pressure_07}, 13.00 = ${air_pressure_13}, 18.00 = ${air_pressure_18}. Data ini telah disimpan pada tanggal ${date}.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,
@@ -131,6 +133,7 @@ export class AirPressureService {
       air_pressure_07,
       air_pressure_13,
       air_pressure_18,
+      date,
     } = dto;
 
     // 1. Ambil data admin
@@ -155,6 +158,7 @@ export class AirPressureService {
           air_pressure_07,
           air_pressure_13,
           air_pressure_18,
+          date,
         })
         .eq('id', id)
         .select()

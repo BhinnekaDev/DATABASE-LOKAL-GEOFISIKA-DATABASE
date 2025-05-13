@@ -16,6 +16,7 @@ import { HumidityQueryDto } from '@/humidity/dto/humidityQueryDto';
 import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
 import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { GetHumidityQueryDto } from '@/humidity/dto/getHumidityQueryDto';
+import { CreateHumidityExcelDto } from '@/humidity/dto/create-humidity-excel.dto';
 import { FilterHumidityByAverageDto } from '@/humidity/dto/filterHumidityByAverageDto';
 
 @ApiTags('Humidity')
@@ -43,6 +44,27 @@ export class HumidityController {
 
     return result;
   }
+
+  // Route untuk menyimpan data excel kelembapan
+  //   @Post('/insert-excel')
+  //   async saveRainfallExcel(
+  //     @Req() req: Request,
+  //     @Query('user_id') userId: string,
+  //     @Body() dto: CreateHumidityExcelDto,
+  //   ) {
+  //     const ipAddress = req.ip as string;
+  //     const userAgent = req.headers['user-agent'] as string;
+
+  //     dto.user_id = userId;
+
+  //     const result = await this.humidityService.saveExcelHumidity(
+  //       dto,
+  //       ipAddress,
+  //       userAgent,
+  //     );
+
+  //     return result;
+  //   }
 
   // Route untuk mengubah data kelembapan
   @Put('/update')
