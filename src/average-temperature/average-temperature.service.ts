@@ -6,7 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditAverageTemperatureDto } from '@/average-temperature/dto/edit-average-temperature.dto';
 import { CreateAverageTemperatureDto } from '@/average-temperature/dto/create-average-temperature.dto';
-import { FilterAverageTemperatureByAverageTemperatureDto } from './dto/filterAverageTemperatureByAverageTemperatureDto';
+import { FilterAverageTemperatureByDateDto } from '@/average-temperature/dto/filterAverageTemperatureByDateDto';
 
 dotenv.config();
 
@@ -335,24 +335,22 @@ export class AverageTemperatureService {
   }
 
   /**
-   * Mengambil data temperatur rata rata berdasarkan rentang temperatur rata rata
+   * Mengambil data temperatur rata rata berdasarkan rentang tanggal temperatur rata rata
    */
-  async getAverageTemperatureByAverageTemperature(
-    dto: FilterAverageTemperatureByAverageTemperatureDto,
-  ) {
-    const { start_average_temperature, end_average_temperature } = dto;
+  async getAverageTemperatureByDate(dto: FilterAverageTemperatureByDateDto) {
+    const { start_date, end_date } = dto;
 
     const { data, error } = await this.supabase
       .from('average_temperature')
       .select('*')
-      .gte('avg_temperature', start_average_temperature)
-      .lte('avg_temperature', end_average_temperature);
+      .gte('date', start_date)
+      .lte('date', end_date);
 
     if (error || !data) {
       return {
         success: false,
         message:
-          'Gagal mengambil data temperatur rata rata berdasarkan rentang temperatur rata rata',
+          'Gagal mengambil data temperatur rata rata berdasarkan rentang tanggal temperatur rata rata',
         error,
       };
     }
@@ -360,7 +358,7 @@ export class AverageTemperatureService {
     return {
       success: true,
       message:
-        'Berhasil mengambil data temperatur rata rata berdasarkan rentang temperatur rata rata',
+        'Berhasil mengambil data temperatur rata rata berdasarkan rentang tanggal temperatur rata rata',
       data,
     };
   }

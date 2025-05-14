@@ -16,7 +16,7 @@ import { AverageTemperatureQueryDto } from '@/average-temperature/dto/averageTem
 import { EditAverageTemperatureDto } from '@/average-temperature/dto/edit-average-temperature.dto';
 import { CreateAverageTemperatureDto } from '@/average-temperature/dto/create-average-temperature.dto';
 import { GetAverageTemperatureQueryDto } from '@/average-temperature/dto/getAverageTemperatureQueryDto';
-import { FilterAverageTemperatureByAverageTemperatureDto } from '@/average-temperature/dto/filterAverageTemperatureByAverageTemperatureDto';
+import { FilterAverageTemperatureByDateDto } from '@/average-temperature/dto/filterAverageTemperatureByDateDto';
 
 @ApiTags('Average Temperature')
 @Controller('average-temperature')
@@ -114,16 +114,16 @@ export class AverageTemperatureController {
     return result;
   }
 
-  // Route untuk ambil data temperatur rata rata berdasarkan rentang temperatur rata rata
+  // Route untuk ambil data temperatur rata rata berdasarkan rentang tanggal temperatur rata rata
   @ApiOkResponse({
     description:
-      'Berhasil mendapatkan data temperatur rata rata berdasarkan rentang temperatur rata rata',
+      'Berhasil mendapatkan data temperatur rata rata berdasarkan rentang tanggal temperatur rata rata',
   })
-  @Get('/get-by-average-temperature')
-  async getAverageTemperatureByAverageTemperature(
-    @Query() query: FilterAverageTemperatureByAverageTemperatureDto,
+  @Get('/get-by-date')
+  async getAverageTemperatureByDate(
+    @Query() query: FilterAverageTemperatureByDateDto,
   ) {
-    return await this.averageTemperatureService.getAverageTemperatureByAverageTemperature(
+    return await this.averageTemperatureService.getAverageTemperatureByDate(
       query,
     );
   }

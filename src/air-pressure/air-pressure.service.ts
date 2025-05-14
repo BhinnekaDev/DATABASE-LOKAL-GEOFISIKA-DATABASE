@@ -6,7 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { EditAirPressureDto } from '@/air-pressure/dto/edit-air-pressure.dto';
 import { CreateAirPressureDto } from '@/air-pressure/dto/create-air-pressure.dto';
-import { FilterAirPressureByAirPressureDto } from '@/air-pressure/dto/filterAirPressureByDateDto';
+import { FilterAirPressureByDateDto } from '@/air-pressure/dto/filterAirPressureByDateDto';
 
 dotenv.config();
 
@@ -319,22 +319,22 @@ export class AirPressureService {
   }
 
   /**
-   * Mengambil data tekanan udara berdasarkan rentang tekanan udara
+   * Mengambil data tekanan udara berdasarkan rentang tanggal tekanan udara
    */
-  async getAirPressureByAirPressure(dto: FilterAirPressureByAirPressureDto) {
-    const { start_air_pressure, end_air_pressure } = dto;
+  async getAirPressureByDate(dto: FilterAirPressureByDateDto) {
+    const { start_date, end_date } = dto;
 
     const { data, error } = await this.supabase
       .from('air_pressure')
       .select('*')
-      .gte('air_pressure', start_air_pressure)
-      .lte('air_pressure', end_air_pressure);
+      .gte('date', start_date)
+      .lte('date', end_date);
 
     if (error || !data) {
       return {
         success: false,
         message:
-          'Gagal mengambil data tekanan udara berdasarkan rentang tekanan udara',
+          'Gagal mengambil data tekanan udara berdasarkan rentang tanggal tekanan udara',
         error,
       };
     }
@@ -342,7 +342,7 @@ export class AirPressureService {
     return {
       success: true,
       message:
-        'Berhasil mengambil data tekanan udara berdasarkan rentang tekanan udara',
+        'Berhasil mengambil data tekanan udara berdasarkan rentang tanggal tekanan udara',
       data,
     };
   }

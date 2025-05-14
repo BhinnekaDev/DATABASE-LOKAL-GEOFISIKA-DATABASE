@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class FilterAirPressureByDateDto {
+export class FilterHumidityByDateDto {
   @ApiProperty({
-    description: 'Nilai tanggal pada awal tekanan udara',
+    description: 'Nilai awal tanggal',
     example: '2023-01-01',
   })
   @IsOptional()
@@ -11,7 +11,7 @@ export class FilterAirPressureByDateDto {
   start_date?: string;
 
   @ApiProperty({
-    description: 'Nilai tanggal pada akhir tekanan udara',
+    description: 'Nilai akhir tanggal',
     example: '2023-10-10',
   })
   @IsOptional()

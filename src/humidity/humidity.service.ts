@@ -6,7 +6,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
 import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
-import { FilterHumidityByAverageDto } from '@/humidity/dto/filterHumidityByAverageDto';
+import { FilterHumidityByDateDto } from '@/humidity/dto/filterHumidityByDateDto';
 
 dotenv.config();
 
@@ -306,22 +306,22 @@ export class HumidityService {
   }
 
   /**
-   * Mengambil data kelembapan berdasarkan rentang rata rata kelembapan
+   * Mengambil data kelembapan berdasarkan rentang tanggal kelembapan
    */
-  async getHumidityByAverage(dto: FilterHumidityByAverageDto) {
-    const { start_average_humidity, end_average_humidity } = dto;
+  async getHumidityByDate(dto: FilterHumidityByDateDto) {
+    const { start_date, end_date } = dto;
 
     const { data, error } = await this.supabase
       .from('humidity')
       .select('*')
-      .gte('avg_humidity', start_average_humidity)
-      .lte('avg_humidity', end_average_humidity);
+      .gte('date', start_date)
+      .lte('date', end_date);
 
     if (error || !data) {
       return {
         success: false,
         message:
-          'Gagal mengambil data kelembapan berdasarkan rentang rata rata kelembapan',
+          'Gagal mengambil data kelembapan berdasarkan rentang tanggal kelembapan',
         error,
       };
     }
@@ -329,7 +329,7 @@ export class HumidityService {
     return {
       success: true,
       message:
-        'Berhasil mengambil data kelembapan berdasarkan rentang rata rata kelembapan',
+        'Berhasil mengambil data kelembapan berdasarkan rentang tanngal kelembapan',
       data,
     };
   }
