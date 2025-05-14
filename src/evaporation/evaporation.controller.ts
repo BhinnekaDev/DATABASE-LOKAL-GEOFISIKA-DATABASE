@@ -17,6 +17,7 @@ import { EvaporationQueryDto } from '@/evaporation/dto/qevaporationQueryDto';
 import { CreateEvaporationDto } from '@/evaporation/dto/create-evaporation.dto';
 import { GetEvaporationQueryDto } from '@/evaporation/dto/getEvaporationQueryDto';
 import { FilterEvaporationByDateDto } from '@/evaporation/dto/filterEvaporationByDateDto';
+import { CreateEvaporationExcelDto } from '@/evaporation/dto/create-evaporation-excel.dto';
 
 @ApiTags('Evaporation')
 @Controller('evaporation')
@@ -39,6 +40,27 @@ export class EvaporationController {
       ipAddress,
       userAgent,
     );
+    return result;
+  }
+
+  // Route untuk menyimpan data excel penguapan
+  @Post('/insert-excel')
+  async saveEvaporationExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateEvaporationExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.evaporationService.saveExcelEvaporation(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
     return result;
   }
 

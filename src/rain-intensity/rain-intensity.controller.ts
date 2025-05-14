@@ -17,6 +17,7 @@ import { EditRainIntensityDto } from '@/rain-intensity/dto/edit-rain-intensity.d
 import { CreateRainIntensityDto } from '@/rain-intensity/dto/create-rain-intensity.dto';
 import { GetRainIntensityQueryDto } from '@/rain-intensity/dto/getRainIntensityQueryDto';
 import { FilterRainIntensityByDateDto } from '@/rain-intensity/dto/filterRainIntensityByDateDto';
+import { CreateRainIntensityExcelDto } from '@/rain-intensity/dto/create-rain-intensity-excel.dto';
 
 @ApiTags('Rain Intensity')
 @Controller('rain-intensity')
@@ -36,6 +37,27 @@ export class RainIntensityController {
     dto.user_id = userId;
 
     const result = await this.rainIntensityService.saveRainIntensity(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel intensitas hujan
+  @Post('/insert-excel')
+  async saveRainIntensityExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateRainIntensityExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.rainIntensityService.saveExcelRainIntensity(
       dto,
       ipAddress,
       userAgent,

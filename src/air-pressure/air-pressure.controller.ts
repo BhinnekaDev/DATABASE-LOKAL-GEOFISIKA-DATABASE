@@ -17,6 +17,7 @@ import { EditAirPressureDto } from '@/air-pressure/dto/edit-air-pressure.dto';
 import { CreateAirPressureDto } from '@/air-pressure/dto/create-air-pressure.dto';
 import { GetAirPressureQueryDto } from '@/air-pressure/dto/getAirPressureQueryDto';
 import { FilterAirPressureByDateDto } from '@/air-pressure/dto/filterAirPressureByDateDto';
+import { CreateAirPressureExcelDto } from '@/air-pressure/dto/create-air-pressure-excel.dto';
 
 @ApiTags('Air Pressure')
 @Controller('air-pressure')
@@ -36,6 +37,27 @@ export class AirPressureController {
     dto.user_id = userId;
 
     const result = await this.airPressureService.saveAirPressure(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel tekanan udara
+  @Post('/insert-excel')
+  async saveaAirPressureExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateAirPressureExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.airPressureService.saveExcelAirPressure(
       dto,
       ipAddress,
       userAgent,
