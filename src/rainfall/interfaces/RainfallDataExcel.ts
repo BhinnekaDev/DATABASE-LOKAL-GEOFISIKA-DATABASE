@@ -1,4 +1,4 @@
 export interface RainfallDataExcel {
-  tanggal: string;
+  tanggal: string | null;
   'curah hujan': string;
 }

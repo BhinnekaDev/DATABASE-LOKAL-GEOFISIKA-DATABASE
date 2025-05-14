@@ -1,4 +1,6 @@
+import { Buffer } from 'buffer';
 import * as dotenv from 'dotenv';
+import * as ExcelJS from 'exceljs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -6,7 +8,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditHumidityDto } from '@/humidity/dto/edit-humidity.dto';
 import { CreateHumidityDto } from '@/humidity/dto/create-humidity.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
+import { HumidityDataExcel } from '@/humidity/interfaces/HumidityDataExcel';
 import { FilterHumidityByDateDto } from '@/humidity/dto/filterHumidityByDateDto';
+import { CreateHumidityExcelDto } from '@/humidity/dto/create-humidity-excel.dto';
 
 dotenv.config();
 
@@ -43,6 +47,73 @@ export class HumidityService {
     }
 
     return { success: true, data };
+  }
+
+  /**
+   * Mendecode base64 menjadi objek Excel
+   */
+  private async decodeBase64ToExcel(
+    base64: string,
+  ): Promise<ExcelJS.Workbook | null> {
+    try {
+      const buffer = Buffer.from(base64, 'base64');
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      return workbook;
+    } catch (error) {
+      console.error('Error decoding base64 to Excel:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Mengonversi data excel menjadi array objek
+   */
+  private parseExcelToData(workbook: ExcelJS.Workbook): HumidityDataExcel[] {
+    const worksheet = workbook.worksheets[0];
+    return worksheet
+      .getSheetValues()
+      .slice(1)
+      .filter((row) => row !== null && row !== undefined)
+      .map((row) => {
+        const jam07 = Number(row[1]);
+        const jam13 = Number(row[2]);
+        const jam18 = Number(row[3]);
+        const tanggal = row[4];
+
+        return {
+          '7:00': jam07,
+          '13:00': jam13,
+          '18:00': jam18,
+          tanggal: tanggal,
+        };
+      });
+  }
+
+  /**
+   * Mengonversi tanggal dari berbagai format menjadi format YYYY-MM-DD
+   */
+  private formatDateToPostgres(date: string): string | null {
+    // Validasi dan konversi format tanggal
+    const parsedDate = new Date(date);
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate.toISOString().split('T')[0];
+    }
+
+    // Format tanggal MM/DD/YYYY
+    const [month, day, year] = date.split('/');
+    if (month && day && year && year.length === 4) {
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    // Format tanggal 1.1 (DD.MM)
+    const [day2, month2] = date.split('.');
+    if (day2 && month2) {
+      const currentYear = new Date().getFullYear();
+      return `${currentYear}-${month2.padStart(2, '0')}-${day2.padStart(2, '0')}`;
+    }
+
+    return null;
   }
 
   /**
@@ -102,6 +173,145 @@ export class HumidityService {
       admin_id: user_id,
       action: 'Menambahkan Data Kelembapan',
       description: `${namaAdmin} menambahkan data kelembapan dengan rata-rata ${avg_humidity}%. Rincian kelembapan tercatat pada pukul 07:00 sebesar ${humidity_07}%, pukul 13:00 sebesar ${humidity_13}%, dan pukul 18:00 sebesar ${humidity_18}%.`,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      created_at: createdAt,
+    });
+
+    return {
+      success: true,
+      message: 'Berhasil menyimpan data kelembapan',
+      data: insertedHumidity,
+    };
+  }
+
+  /**
+   * Menyimpan data excel kelembapan dan mencatat ke activity log
+   */
+  async saveExcelHumidity(
+    dto: CreateHumidityExcelDto,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    const { user_id, file_base64 } = dto;
+
+    // 1. Ambil data admin
+    const adminResponse = await this.getAdminData(user_id);
+    if (!adminResponse.success || !adminResponse.data) {
+      return {
+        success: false,
+        message: 'Data admin tidak ditemukan',
+        error: adminResponse.error,
+      };
+    }
+
+    const { first_name, last_name } = adminResponse.data;
+    const namaAdmin = `${first_name} ${last_name}`;
+
+    // 2. Decode base64 ke file Excel
+    const workbook = await this.decodeBase64ToExcel(file_base64);
+    if (!workbook) {
+      return {
+        success: false,
+        message: 'Gagal mendecode base64 menjadi file Excel',
+      };
+    }
+
+    // 3. Parse Excel menjadi objek
+    const data = this.parseExcelToData(workbook);
+    if (data.length === 0) {
+      return {
+        success: false,
+        message: 'Data Excel kosong atau tidak valid',
+      };
+    }
+
+    // 4. Format tanggal dan sesuaikan data untuk tabel
+    const dataWithFormattedDate = data
+      .map((row) => {
+        if (
+          row['7:00']?.toString().toLowerCase() === '7:00' ||
+          row['13:00']?.toString().toLowerCase() === '13:00' ||
+          row['18:00']?.toString().toLowerCase() === '18:00' ||
+          row['tanggal']?.toString().toLowerCase() === 'tanggal'
+        ) {
+          return null;
+        }
+
+        const time07 = parseFloat(String(row['7:00']));
+        if (isNaN(time07)) {
+          console.error('Nilai 07:00 tidak valid:', row);
+          return null;
+        }
+
+        const time13 = parseFloat(String(row['13:00']));
+        if (isNaN(time13)) {
+          console.error('Nilai 13:00 tidak valid:', row);
+          return null;
+        }
+
+        const time18 = parseFloat(String(row['18:00']));
+        if (isNaN(time18)) {
+          console.error('Nilai 18:00 tidak valid:', row);
+          return null;
+        }
+
+        if (!row['tanggal']) {
+          console.error('Tanggal tidak ditemukan untuk data:', row);
+          return null;
+        }
+
+        const formattedDate = this.formatDateToPostgres(row['tanggal']);
+        if (!formattedDate) {
+          console.error('Tanggal tidak valid:', row['tanggal']);
+          return null;
+        }
+
+        const avg_humidity = parseFloat(
+          ((time07 + time13 + time18) / 3).toFixed(2),
+        );
+
+        return {
+          avg_humidity,
+          humidity_07: time07,
+          humidity_13: time13,
+          humidity_18: time18,
+          date: formattedDate,
+        };
+      })
+      .filter((row) => row !== null);
+
+    // Pastikan ada data yang valid sebelum dilanjutkan
+    if (dataWithFormattedDate.length === 0) {
+      return {
+        success: false,
+        message: 'Tidak ada data valid untuk disimpan',
+      };
+    }
+
+    // 5. Simpan data kelembapan ke dalam tabel 'humidity'
+    const { data: insertedHumidity, error: humidityError } = await this.supabase
+      .from('humidity')
+      .insert(dataWithFormattedDate)
+      .select();
+
+    if (humidityError || !insertedHumidity || insertedHumidity.length === 0) {
+      return {
+        success: false,
+        message: 'Gagal menyimpan data kelembapan',
+        error: humidityError,
+      };
+    }
+
+    // 6. Mencatat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    await this.activityLogService.logActivity({
+      admin_id: user_id,
+      action: 'Menambahkan Data Kelembapan',
+      description: `${namaAdmin} menambahkan data kelembapan dengan mengunggah file excel.`,
       ip_address: ipAddress,
       user_agent: userAgent,
       created_at: createdAt,

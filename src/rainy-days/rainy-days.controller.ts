@@ -17,6 +17,7 @@ import { EditRainyDaysDto } from '@/rainy-days/dto/edit-rainy-days.dto';
 import { CreateRainyDaysDto } from '@/rainy-days/dto/create-rainy-days.dto';
 import { GetRainyDaysQueryDto } from '@/rainy-days/dto/getRainyDaysQueryDto';
 import { FilterRainyDaysByDateDto } from '@/rainy-days/dto/filterRainyDaysByDateDto';
+import { CreateRainyDaysExcelDto } from '@/rainy-days/dto/create-rainy-days-excel.dto';
 
 @ApiTags('Rainy Days')
 @Controller('rainy-days')
@@ -36,6 +37,27 @@ export class RainyDaysController {
     dto.user_id = userId;
 
     const result = await this.rainyDaysService.saveRainyDays(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel hari hujan
+  @Post('/insert-excel')
+  async saveRainyDaysExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateRainyDaysExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.rainyDaysService.saveExcelRainyDays(
       dto,
       ipAddress,
       userAgent,

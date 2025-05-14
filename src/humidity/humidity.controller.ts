@@ -46,25 +46,25 @@ export class HumidityController {
   }
 
   // Route untuk menyimpan data excel kelembapan
-  //   @Post('/insert-excel')
-  //   async saveRainfallExcel(
-  //     @Req() req: Request,
-  //     @Query('user_id') userId: string,
-  //     @Body() dto: CreateHumidityExcelDto,
-  //   ) {
-  //     const ipAddress = req.ip as string;
-  //     const userAgent = req.headers['user-agent'] as string;
+  @Post('/insert-excel')
+  async saveHumidityExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateHumidityExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
 
-  //     dto.user_id = userId;
+    dto.user_id = userId;
 
-  //     const result = await this.humidityService.saveExcelHumidity(
-  //       dto,
-  //       ipAddress,
-  //       userAgent,
-  //     );
+    const result = await this.humidityService.saveExcelHumidity(
+      dto,
+      ipAddress,
+      userAgent,
+    );
 
-  //     return result;
-  //   }
+    return result;
+  }
 
   // Route untuk mengubah data kelembapan
   @Put('/update')
