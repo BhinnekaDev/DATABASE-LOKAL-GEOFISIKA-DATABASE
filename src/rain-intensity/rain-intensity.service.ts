@@ -10,7 +10,7 @@ import { EditRainIntensityDto } from '@/rain-intensity/dto/edit-rain-intensity.d
 import { CreateRainIntensityDto } from '@/rain-intensity/dto/create-rain-intensity.dto';
 import { RainIntensityDataExcel } from '@/rain-intensity/interfaces/RainIntensityDataExcel';
 import { FilterRainIntensityByDateDto } from '@/rain-intensity/dto/filterRainIntensityByDateDto';
-import { CreateRainIntensityExcelDto } from './dto/create-rain-intensity-excel.dto';
+import { CreateRainIntensityExcelDto } from '@/rain-intensity/dto/create-rain-intensity-excel.dto';
 
 dotenv.config();
 

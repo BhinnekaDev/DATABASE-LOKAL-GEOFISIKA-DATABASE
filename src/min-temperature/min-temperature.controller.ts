@@ -17,6 +17,7 @@ import { EditMinTemperatureDto } from '@/min-temperature/dto/edit-min-temperatur
 import { CreateMinTemperatureDto } from '@/min-temperature/dto/create-min-temperature.dto';
 import { GetMinTemperatureQueryDto } from '@/min-temperature/dto/getMinTemperatureQueryDto';
 import { FilterMinTemperatureByDateDto } from '@/min-temperature/dto/filterMinTemperatureByDateDto';
+import { CreateMinTemperatureExcelDto } from '@/min-temperature/dto/create-min-temperature-excel.dto';
 
 @ApiTags('Min Temperatue')
 @Controller('min-temperature')
@@ -36,6 +37,27 @@ export class MinTemperatureController {
     dto.user_id = userId;
 
     const result = await this.minTemperatureService.saveMinTemperature(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel temperatur minimal
+  @Post('/insert-excel')
+  async saveMinTemperatureExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateMinTemperatureExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.minTemperatureService.saveExcelMinTemperature(
       dto,
       ipAddress,
       userAgent,

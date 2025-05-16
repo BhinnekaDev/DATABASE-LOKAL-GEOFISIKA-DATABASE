@@ -17,6 +17,7 @@ import { EditMaxTemperatureDto } from '@/max-temperature/dto/edit-max-temperatur
 import { CreateMaxTemperatureDto } from '@/max-temperature/dto/create-max-temperature.dto';
 import { GetMaxTemperatureQueryDto } from '@/max-temperature/dto/getMaxTemperatureQueryDto';
 import { FilterMaxTemperatureByDateDto } from '@/max-temperature/dto/filterMaxTemperatureByDateDto';
+import { CreateMaxTemperatureExcelDto } from '@/max-temperature/dto/create-max-temperature-excel.dto';
 
 @ApiTags('Max Temperature')
 @Controller('max-temperature')
@@ -36,6 +37,27 @@ export class MaxTemperatureController {
     dto.user_id = userId;
 
     const result = await this.maxTemperatureService.saveMaxTemperature(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel temperatur maksimal
+  @Post('/insert-excel')
+  async saveMaxTemperatureExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateMaxTemperatureExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.maxTemperatureService.saveExcelMaxTemperature(
       dto,
       ipAddress,
       userAgent,
