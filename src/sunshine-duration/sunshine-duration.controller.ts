@@ -17,6 +17,7 @@ import { EditSunshineDurationDto } from '@/sunshine-duration/dto/edit-sunshine-d
 import { CreateSunshineDurationDto } from '@/sunshine-duration/dto/create-sunshine-duration.dto';
 import { GetSunshineDurationQueryDto } from '@/sunshine-duration/dto/getSunshineDurationQueryDto';
 import { FilterSunShineDurationByDateDto } from '@/sunshine-duration/dto/filterSunShineDurationByDateDto';
+import { CreateSunshineDurationExcelDto } from '@/sunshine-duration/dto/create-sunshine-duration-excel.dto';
 
 @ApiTags('Sunshine Duration')
 @Controller('sunshine-duration')
@@ -38,6 +39,27 @@ export class SunshineDurationController {
     dto.user_id = userId;
 
     const result = await this.sunshineDurationService.saveSunshineDuration(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel durasi matahari terbit
+  @Post('/insert-excel')
+  async saveSunshineDurationExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateSunshineDurationExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.sunshineDurationService.saveExcelSunshineDuration(
       dto,
       ipAddress,
       userAgent,

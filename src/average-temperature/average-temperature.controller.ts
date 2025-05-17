@@ -17,6 +17,7 @@ import { EditAverageTemperatureDto } from '@/average-temperature/dto/edit-averag
 import { CreateAverageTemperatureDto } from '@/average-temperature/dto/create-average-temperature.dto';
 import { GetAverageTemperatureQueryDto } from '@/average-temperature/dto/getAverageTemperatureQueryDto';
 import { FilterAverageTemperatureByDateDto } from '@/average-temperature/dto/filterAverageTemperatureByDateDto';
+import { CreateAverageTemperatureExcelDto } from '@/average-temperature/dto/create-average-temperature-excel.dto';
 
 @ApiTags('Average Temperature')
 @Controller('average-temperature')
@@ -42,6 +43,28 @@ export class AverageTemperatureController {
       ipAddress,
       userAgent,
     );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel temperatur rata rata
+  @Post('/insert-excel')
+  async saveaAverageTemperaturePressureExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateAverageTemperatureExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result =
+      await this.averageTemperatureService.saveExcelAverageTemperature(
+        dto,
+        ipAddress,
+        userAgent,
+      );
 
     return result;
   }
