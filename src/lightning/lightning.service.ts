@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import * as dotenv from 'dotenv';
+import * as ExcelJS from 'exceljs';
 import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -8,7 +9,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditLightningDto } from '@/lightning/dto/edit-lightning.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateLightningDto } from '@/lightning/dto/create-lightning.dto';
+import { LightningDataExcel } from '@/lightning/interfaces/LightningDataExcel';
 import { FilterLightningByDateDto } from '@/lightning/dto/filterLightningByDateDto';
+import { CreateLightningExcelDto } from '@/lightning/dto/create-lightning-excel.dto';
 
 dotenv.config();
 
@@ -45,6 +48,64 @@ export class LightningService {
     }
 
     return { success: true, data };
+  }
+
+  /**
+   * Mendecode base64 menjadi objek Excel
+   */
+  private async decodeBase64ToExcel(
+    base64: string,
+  ): Promise<ExcelJS.Workbook | null> {
+    try {
+      const buffer = Buffer.from(base64, 'base64');
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      return workbook;
+    } catch (error) {
+      console.error('Error decoding base64 to Excel:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Mengonversi data excel menjadi array objek
+   */
+  private parseExcelToData(workbook: ExcelJS.Workbook): LightningDataExcel[] {
+    const worksheet = workbook.worksheets[0];
+    return worksheet
+      .getSheetValues()
+      .slice(1)
+      .filter((row) => row !== null && row !== undefined)
+      .map((row) => ({
+        nama: row[1],
+        tanggal: row[2],
+      }));
+  }
+
+  /**
+   * Mengonversi tanggal dari berbagai format menjadi format YYYY-MM-DD
+   */
+  private formatDateToPostgres(date: string): string | null {
+    // Validasi dan konversi format tanggal
+    const parsedDate = new Date(date);
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate.toISOString().split('T')[0];
+    }
+
+    // Format tanggal MM/DD/YYYY
+    const [month, day, year] = date.split('/');
+    if (month && day && year && year.length === 4) {
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    // Format tanggal 1.1 (DD.MM)
+    const [day2, month2] = date.split('.');
+    if (day2 && month2) {
+      const currentYear = new Date().getFullYear();
+      return `${currentYear}-${month2.padStart(2, '0')}-${day2.padStart(2, '0')}`;
+    }
+
+    return null;
   }
 
   /**
@@ -137,6 +198,129 @@ export class LightningService {
       success: true,
       message: 'Berhasil menyimpan data petir dan mengunggah gambar',
       data: lightningDataInserted,
+    };
+  }
+
+  /**
+   * Menyimpan data excel petir dan mencatat ke activity log
+   */
+  async saveExcelLightning(
+    dto: CreateLightningExcelDto,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    const { user_id, file_base64 } = dto;
+
+    // 1. Ambil data admin
+    const adminResponse = await this.getAdminData(user_id);
+    if (!adminResponse.success || !adminResponse.data) {
+      return {
+        success: false,
+        message: 'Data admin tidak ditemukan',
+        error: adminResponse.error,
+      };
+    }
+
+    const { first_name, last_name } = adminResponse.data;
+    const namaAdmin = `${first_name} ${last_name}`;
+
+    // 2. Decode base64 ke file Excel
+    const workbook = await this.decodeBase64ToExcel(file_base64);
+    if (!workbook) {
+      return {
+        success: false,
+        message: 'Gagal mendecode base64 menjadi file Excel',
+      };
+    }
+
+    // 3. Parse Excel menjadi objek
+    const data = this.parseExcelToData(workbook);
+    if (data.length === 0) {
+      return {
+        success: false,
+        message: 'Data Excel kosong atau tidak valid',
+      };
+    }
+
+    // 4. Format tanggal dan sesuaikan data untuk tabel
+    const dataWithFormattedDate = data
+      .map((row) => {
+        if (
+          row['tanggal']?.toString().toLowerCase() === 'tanggal' ||
+          row['nama']?.toString().toLowerCase() === 'nama'
+        ) {
+          return null;
+        }
+
+        if (!row['tanggal']) {
+          console.error('Tanggal tidak ditemukan untuk data:', row);
+          return null;
+        }
+
+        const formattedDate = this.formatDateToPostgres(row['tanggal']);
+        if (!formattedDate) {
+          console.error('Tanggal tidak valid:', row['tanggal']);
+          return null;
+        }
+
+        const lightning = row['nama'];
+        if (!lightning) {
+          console.error('Nama tidak valid untuk data:', row);
+          return null;
+        }
+
+        return {
+          name: lightning,
+          date: formattedDate,
+        };
+      })
+      .filter((row) => row !== null);
+
+    // Pastikan ada data yang valid sebelum dilanjutkan
+    if (dataWithFormattedDate.length === 0) {
+      return {
+        success: false,
+        message: 'Tidak ada data valid untuk disimpan',
+      };
+    }
+
+    // 5. Simpan data petir ke dalam tabel 'lightning'
+    const { data: insertedLightning, error: lightningError } =
+      await this.supabase
+        .from('lightning')
+        .insert(dataWithFormattedDate)
+        .select();
+
+    if (
+      lightningError ||
+      !insertedLightning ||
+      insertedLightning.length === 0
+    ) {
+      return {
+        success: false,
+        message: 'Gagal menyimpan data petir',
+        error: lightningError,
+      };
+    }
+
+    // 6. Mencatat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    await this.activityLogService.logActivity({
+      admin_id: user_id,
+      action: 'Menambahkan Data Petir',
+      description: `${namaAdmin} menambahkan data petir dengan mengunggah file excel.`,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      created_at: createdAt,
+    });
+
+    return {
+      success: true,
+      message: 'Berhasil menyimpan data petir',
+      data: insertedLightning,
     };
   }
 

@@ -17,6 +17,7 @@ import { EditLightningDto } from '@/lightning/dto/edit-lightning.dto';
 import { CreateLightningDto } from '@/lightning/dto/create-lightning.dto';
 import { GetLightningQueryDto } from '@/lightning/dto/getLightningQueryDto';
 import { FilterLightningByDateDto } from '@/lightning/dto/filterLightningByDateDto';
+import { CreateLightningExcelDto } from '@/lightning/dto/create-lightning-excel.dto';
 
 @ApiTags('Lightning')
 @Controller('lightning')
@@ -36,6 +37,27 @@ export class LightningController {
     dto.user_id = userId;
 
     const result = await this.lightningService.saveLightning(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel petir
+  @Post('/insert-excel')
+  async saveLightningExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateLightningExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.lightningService.saveExcelLightning(
       dto,
       ipAddress,
       userAgent,
