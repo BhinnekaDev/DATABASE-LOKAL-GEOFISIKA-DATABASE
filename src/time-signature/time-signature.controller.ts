@@ -17,6 +17,7 @@ import { EditTimeSignatureDto } from '@/time-signature/dto/edit-time-signature.d
 import { CreateTimeSignatureDto } from '@/time-signature/dto/create-time-signature.dto';
 import { GetTimeSignatureQueryDto } from '@/time-signature/dto/getTimeSignatureQueryDto';
 import { FilterTimeSignatureByDateDto } from '@/time-signature/dto/filterTimeSignatureByDateDto';
+import { CreateTimeSignatureExcelDto } from '@/time-signature/dto/create-time-signature-excel.dto';
 
 @ApiTags('Time Signature')
 @Controller('time-signature')
@@ -36,6 +37,27 @@ export class TimeSignatureController {
     dto.user_id = userId;
 
     const result = await this.timeSignatureService.saveTimeSignature(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel tanda waktu
+  @Post('/insert-excel')
+  async saveTimeSignatureExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateTimeSignatureExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.timeSignatureService.saveExcelTimeSignature(
       dto,
       ipAddress,
       userAgent,
