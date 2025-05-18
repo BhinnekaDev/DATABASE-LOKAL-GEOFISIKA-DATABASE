@@ -1,4 +1,6 @@
+import { Buffer } from 'buffer';
 import * as dotenv from 'dotenv';
+import * as ExcelJS from 'exceljs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -6,8 +8,10 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditEarthquakeDto } from '@/earthquake/dto/edit-earthquake.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateEarthquakeDto } from '@/earthquake/dto/create-earthquake.dto';
+import { EarthquakeDataExcel } from '@/earthquake/interfaces/EarthquakeDataExcel';
 import { FilterEarthquakeByDateDto } from '@/earthquake/dto/filterEarthquakeByDateDto';
 import { CreateEarthquakeParseDto } from '@/earthquake/dto/create-earthquake-parse.dto';
+import { CreateEarthquakeExcelDto } from '@/earthquake/dto/create-earthquake-excel.dto';
 
 dotenv.config();
 
@@ -44,6 +48,71 @@ export class EarthquakeService {
     }
 
     return { success: true, data };
+  }
+
+  /**
+   * Mendecode base64 menjadi objek Excel
+   */
+  private async decodeBase64ToExcel(
+    base64: string,
+  ): Promise<ExcelJS.Workbook | null> {
+    try {
+      const buffer = Buffer.from(base64, 'base64');
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer);
+      return workbook;
+    } catch (error) {
+      console.error('Error decoding base64 to Excel:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Mengonversi data excel menjadi array objek
+   */
+  private parseExcelToData(workbook: ExcelJS.Workbook): EarthquakeDataExcel[] {
+    const worksheet = workbook.worksheets[0];
+    return worksheet
+      .getSheetValues()
+      .slice(1)
+      .filter((row) => row !== null && row !== undefined)
+      .map((row) => ({
+        waktu: row[1],
+        mmi: row[2],
+        deskripsi: row[3],
+        'kedalaman (km)': row[4],
+        lintang: row[5],
+        bujur: row[6],
+        magnitudo: row[7],
+        'nama pengamat': row[8],
+        tanggal: row[9],
+      }));
+  }
+
+  /**
+   * Mengonversi tanggal dari berbagai format menjadi format YYYY-MM-DD
+   */
+  private formatDateToPostgres(date: string): string | null {
+    // Validasi dan konversi format tanggal
+    const parsedDate = new Date(date);
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate.toISOString().split('T')[0];
+    }
+
+    // Format tanggal MM/DD/YYYY
+    const [month, day, year] = date.split('/');
+    if (month && day && year && year.length === 4) {
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+
+    // Format tanggal 1.1 (DD.MM)
+    const [day2, month2] = date.split('.');
+    if (day2 && month2) {
+      const currentYear = new Date().getFullYear();
+      return `${currentYear}-${month2.padStart(2, '0')}-${day2.padStart(2, '0')}`;
+    }
+
+    return null;
   }
 
   /**
@@ -268,6 +337,186 @@ export class EarthquakeService {
       success: true,
       message: 'Berhasil menyimpan data gempa',
       data: insertedEarthquake,
+    };
+  }
+
+  /**
+   * Menyimpan data excel gempa dan mencatat ke activity log
+   */
+  async saveExcelEarthquake(
+    dto: CreateEarthquakeExcelDto,
+    ipAddress: string,
+    userAgent: string,
+  ) {
+    const { user_id, file_base64 } = dto;
+
+    // 1. Ambil data admin
+    const adminResponse = await this.getAdminData(user_id);
+    if (!adminResponse.success || !adminResponse.data) {
+      return {
+        success: false,
+        message: 'Data admin tidak ditemukan',
+        error: adminResponse.error,
+      };
+    }
+
+    const { first_name, last_name } = adminResponse.data;
+    const namaAdmin = `${first_name} ${last_name}`;
+
+    // 2. Decode base64 ke file Excel
+    const workbook = await this.decodeBase64ToExcel(file_base64);
+    if (!workbook) {
+      return {
+        success: false,
+        message: 'Gagal mendecode base64 menjadi file Excel',
+      };
+    }
+
+    // 3. Parse Excel menjadi objek
+    const data = this.parseExcelToData(workbook);
+    if (data.length === 0) {
+      return {
+        success: false,
+        message: 'Data Excel kosong atau tidak valid',
+      };
+    }
+
+    // 4. Format tanggal dan sesuaikan data untuk tabel
+    const dataWithFormattedDate = data
+      .map((row) => {
+        if (
+          row['tanggal']?.toString().toLowerCase() === 'tanggal' ||
+          row['waktu']?.toString().toLowerCase() === 'waktu' ||
+          row['mmi']?.toString().toLowerCase() === 'mmi' ||
+          row['deskripsi']?.toString().toLowerCase() === 'deskripsi' ||
+          row['kedalaman (km)']?.toString().toLowerCase() ===
+            'kedalaman (km)' ||
+          row['lintang']?.toString().toLowerCase() === 'lintang' ||
+          row['bujur']?.toString().toLowerCase() === 'bujur' ||
+          row['magnitudo']?.toString().toLowerCase() === 'magnitudo' ||
+          row['nama pengamat']?.toString().toLowerCase() === 'nama pengamat'
+        ) {
+          return null;
+        }
+
+        if (!row['tanggal']) {
+          console.error('Tanggal tidak ditemukan untuk data:', row);
+          return null;
+        }
+
+        const formattedDate = this.formatDateToPostgres(row['tanggal']);
+        if (!formattedDate) {
+          console.error('Tanggal tidak valid:', row['tanggal']);
+          return null;
+        }
+
+        const time = row['waktu'];
+        if (!time) {
+          console.error('waktu tidak valid untuk data:', row);
+          return null;
+        }
+
+        const mmi = row['mmi'];
+        if (!mmi) {
+          console.error('mmi tidak valid untuk data:', row);
+          return null;
+        }
+
+        const description = row['deskripsi'];
+        if (!description) {
+          console.error('deskripsi tidak valid untuk data:', row);
+          return null;
+        }
+
+        const depth = row['kedalaman (km)'];
+        if (isNaN(depth)) {
+          console.error('kedalaman tidak valid untuk data:', row);
+          return null;
+        }
+
+        const latitude = row['lintang'];
+        if (isNaN(latitude)) {
+          console.error('lintang tidak valid untuk data:', row);
+          return null;
+        }
+
+        const longitude = row['bujur'];
+        if (isNaN(longitude)) {
+          console.error('bujur tidak valid untuk data:', row);
+          return null;
+        }
+
+        const magnitude = row['magnitudo'];
+        if (isNaN(magnitude)) {
+          console.error('magnitudo tidak valid untuk data:', row);
+          return null;
+        }
+
+        const observerName = row['nama pengamat'];
+        if (!observerName) {
+          console.error('nama pengamat tidak valid untuk data:', row);
+          return null;
+        }
+
+        return {
+          time,
+          mmi,
+          description,
+          depth,
+          latitude,
+          longitude,
+          magnitude,
+          observer_name: observerName,
+          date: formattedDate,
+        };
+      })
+      .filter((row) => row !== null);
+
+    // Pastikan ada data yang valid sebelum dilanjutkan
+    if (dataWithFormattedDate.length === 0) {
+      return {
+        success: false,
+        message: 'Tidak ada data valid untuk disimpan',
+      };
+    }
+
+    // 5. Simpan data gempa ke dalam tabel 'earthquake'
+    const { data: earthquakeEvaporation, error: earthquakeError } =
+      await this.supabase
+        .from('earthquake')
+        .insert(dataWithFormattedDate)
+        .select();
+
+    if (
+      earthquakeError ||
+      !earthquakeEvaporation ||
+      earthquakeEvaporation.length === 0
+    ) {
+      return {
+        success: false,
+        message: 'Gagal menyimpan data gempa',
+        error: earthquakeError,
+      };
+    }
+
+    // 6. Mencatat ke activity log
+    const createdAt = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jakarta',
+    });
+
+    await this.activityLogService.logActivity({
+      admin_id: user_id,
+      action: 'Menambahkan Data Gempa',
+      description: `${namaAdmin} menambahkan data gempa dengan mengunggah file excel.`,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      created_at: createdAt,
+    });
+
+    return {
+      success: true,
+      message: 'Berhasil menyimpan data gempa',
+      data: earthquakeEvaporation,
     };
   }
 

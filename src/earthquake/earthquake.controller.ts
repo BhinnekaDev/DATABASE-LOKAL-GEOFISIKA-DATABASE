@@ -18,6 +18,7 @@ import { CreateEarthquakeDto } from '@/earthquake/dto/create-earthquake.dto';
 import { GetEarthquakeQueryDto } from '@/earthquake/dto/getEarthquakeQueryDto';
 import { FilterEarthquakeByDateDto } from '@/earthquake/dto/filterEarthquakeByDateDto';
 import { CreateEarthquakeParseDto } from '@/earthquake/dto/create-earthquake-parse.dto';
+import { CreateEarthquakeExcelDto } from '@/earthquake/dto/create-earthquake-excel.dto';
 
 @ApiTags('Earthquake')
 @Controller('earthquake')
@@ -37,6 +38,27 @@ export class EarthquakeController {
     dto.user_id = userId;
 
     const result = await this.earthquakeService.saveEarthquake(
+      dto,
+      ipAddress,
+      userAgent,
+    );
+
+    return result;
+  }
+
+  // Route untuk menyimpan data excel gempa
+  @Post('/insert-excel')
+  async saveEarthquakeExcel(
+    @Req() req: Request,
+    @Query('user_id') userId: string,
+    @Body() dto: CreateEarthquakeExcelDto,
+  ) {
+    const ipAddress = req.ip as string;
+    const userAgent = req.headers['user-agent'] as string;
+
+    dto.user_id = userId;
+
+    const result = await this.earthquakeService.saveExcelEarthquake(
       dto,
       ipAddress,
       userAgent,
