@@ -120,7 +120,7 @@ export class EarthquakeService {
    */
   private parseEarthquakeInput(input: string) {
     const regex =
-      /Mag:([\d.]+),\s(\d{2}-[a-zA-Z]{3}-\d{2})\s(\d{2}:\d{2}:\d{2})\sWIB,\sLok:([\d.]+)\sLS\s-\s([\d.]+)\sBT\s\((\d+)\skm\s([^)]+)\),\sKedlmn:\s(\d+)KM\s::([A-Z]+)/;
+      /Mag:([\d.]+),\s(\d{2}-[a-zA-Z]{3}-\d{2})\s(\d{2}:\d{2}:\d{2})\sWIB,\sLok:([\d.]+)\sLS\s-\s([\d.]+)\sBT\s\((\d+)\skm\s([^)]+)\),\sKedlmn:\s(\d+)\s?[Kk][Mm]\s::(.+)/;
 
     const matches = input.match(regex);
 

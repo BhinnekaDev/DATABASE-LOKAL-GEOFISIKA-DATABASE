@@ -8,7 +8,7 @@ export class CreateEarthquakeParseDto {
 
   @ApiProperty({
     example:
-      'Mag 3.7, 13-mar-25 17:01:42 WIB, lok:3.61 LS - 102,61 BT (5 km TimurLaut KEPAHIANG-BENGKULU), Kedlmn: 8KM ::BMKG',
+      'Mag:2.9, 18-Mei-25 22:23:51 WIB, Lok:4.5 LS - 101.73 BT (105 km BaratDaya SELUMA-BENGKULU), Kedlmn: 76 Km ::BMKG',
     description: 'Data gempa',
   })
   @IsNotEmpty()
