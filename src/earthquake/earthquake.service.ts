@@ -119,13 +119,24 @@ export class EarthquakeService {
    * Mengubah format string input menjadi objek Earthquake
    */
   private parseEarthquakeInput(input: string) {
-    const regex =
+    const regexWithoutMMI =
       /Mag:([\d.]+),\s(\d{2}-[a-zA-Z]{3}-\d{2})\s(\d{2}:\d{2}:\d{2})\sWIB,\sLok:([\d.]+)\sLS\s-\s([\d.]+)\sBT\s\((\d+)\skm\s([^)]+)\),\sKedlmn:\s(\d+)\s?[Kk][Mm]\s::(.+)/;
 
-    const matches = input.match(regex);
+    const regexWithMMI =
+      /Mag:([\d.]+),\s(\d{2}-[a-zA-Z]{3}-\d{2})\s(\d{2}:\d{2}:\d{2})\sWIB,\sLok:([\d.]+)\sLS\s-\s([\d.]+)\sBT\s\((\d+)\skm\s([^)]+)\),\sKedlmn:\s(\d+)\s?[Kk][Mm],\sdirasakan\sDi\s(.+?)\s::(.+)/;
+
+    let matches: RegExpMatchArray | null;
+    let hasMMI = false;
+
+    matches = input.match(regexWithMMI);
+    if (matches) {
+      hasMMI = true;
+    } else {
+      matches = input.match(regexWithoutMMI);
+    }
 
     if (!matches) {
-      throw new Error('Format input tidak valid');
+      throw new Error('Invalid input format');
     }
 
     const magnitude = parseFloat(matches[1]);
@@ -134,8 +145,10 @@ export class EarthquakeService {
     const latitude = parseFloat(matches[4].replace(',', '.'));
     const longitude = parseFloat(matches[5].replace(',', '.'));
     const depth = parseInt(matches[8], 10);
-    const description = matches[7].trim();
-    const observer_name = matches[9].trim();
+    const location = matches[7].trim();
+
+    const mmi = hasMMI ? matches[9].trim() : null;
+    const observerName = hasMMI ? matches[10].trim() : matches[9].trim();
 
     return {
       magnitude,
@@ -144,8 +157,9 @@ export class EarthquakeService {
       latitude,
       longitude,
       depth,
-      description,
-      observer_name,
+      description: location,
+      mmi,
+      observerName,
     };
   }
 
@@ -292,7 +306,8 @@ export class EarthquakeService {
       longitude,
       depth,
       description,
-      observer_name,
+      mmi,
+      observerName,
     } = this.parseEarthquakeInput(input);
 
     // 3. Simpan data gempa
@@ -307,7 +322,8 @@ export class EarthquakeService {
           depth,
           latitude,
           longitude,
-          observer_name,
+          mmi,
+          observer_name: observerName,
         })
         .select();
 
