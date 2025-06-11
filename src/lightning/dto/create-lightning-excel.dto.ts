@@ -2,10 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateLightningExcelDto {
-  @IsNotEmpty()
-  @IsString()
-  user_id: string;
-
   @ApiProperty({
     description: 'Unggah file excel petir',
     example:

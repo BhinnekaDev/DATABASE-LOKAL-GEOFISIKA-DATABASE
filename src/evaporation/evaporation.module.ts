@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
 import { EvaporationService } from '@/evaporation/evaporation.service';
-import { ActivityLogModule } from '@/activity-log/activity-log.module';
+import { ActivityLogModule } from '@/activity-log/activity-log.module'; 
 import { EvaporationController } from '@/evaporation/evaporation.controller';
 
 @Module({

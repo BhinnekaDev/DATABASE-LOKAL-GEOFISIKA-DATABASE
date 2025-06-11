@@ -136,8 +136,17 @@ export class TimeSignatureService {
     const fileName = `${uuidv4()}.jpg`;
     const bucketName = 'time-signatures';
 
+    // 🔧 Perbaiki format base64 jika tidak standar
+    let fixedBase64 = file_base64;
+    if (fixedBase64.startsWith('data:@file/jpeg;base64,')) {
+      fixedBase64 = fixedBase64.replace(
+        'data:@file/jpeg;base64,',
+        'data:image/jpeg;base64,',
+      );
+    }
+
     // Convert base64 ke Buffer
-    const base64Data = file_base64.replace(/^data:image\/\w+;base64,/, '');
+    const base64Data = fixedBase64.replace(/^data:image\/\w+;base64,/, '');
     const fileBuffer = Buffer.from(base64Data, 'base64');
 
     // Unggah ke Supabase
@@ -156,12 +165,12 @@ export class TimeSignatureService {
       };
     }
 
-    // 3. Simpan ke database
+    // 3. Ambil URL publik dari file yang diunggah
     const { data: publicUrlData } = this.supabase.storage
       .from(bucketName)
       .getPublicUrl(fileName);
 
-    // 4. Simpan data tanda waktu
+    // 4. Simpan data tanda waktu ke database
     const { data: timeSignatureDataInserted, error: insertError } =
       await this.supabase
         .from('time_signature')
@@ -180,6 +189,12 @@ export class TimeSignatureService {
         error: insertError,
       };
     }
+
+    return {
+      success: true,
+      message: 'Data tanda waktu berhasil disimpan',
+      data: timeSignatureDataInserted,
+    };
 
     // 5. Mencatat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
@@ -370,6 +385,15 @@ export class TimeSignatureService {
 
     // 3. Jika terdapat file baru, hapus file lama dan upload file baru
     if (file_base64) {
+      // Perbaiki base64 jika tidak standar
+      let fixedBase64 = file_base64;
+      if (fixedBase64.startsWith('data:@file/jpeg;base64,')) {
+        fixedBase64 = fixedBase64.replace(
+          'data:@file/jpeg;base64,',
+          'data:image/jpeg;base64,',
+        );
+      }
+
       // Jika file_url sudah ada, hapus file lama dari storage
       if (timeSignatureData.file_url) {
         const parts = timeSignatureData.file_url.split('/');
@@ -380,7 +404,7 @@ export class TimeSignatureService {
 
       // Upload file baru
       const newFileName = `${uuidv4()}.jpg`;
-      const base64Data = file_base64.replace(/^data:image\/\w+;base64,/, '');
+      const base64Data = fixedBase64.replace(/^data:image\/\w+;base64,/, '');
       const fileBuffer = Buffer.from(base64Data, 'base64');
 
       const { error: uploadError } = await this.supabase.storage

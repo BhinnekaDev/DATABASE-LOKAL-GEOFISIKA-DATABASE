@@ -18,6 +18,9 @@ import { CreateLightningDto } from '@/lightning/dto/create-lightning.dto';
 import { GetLightningQueryDto } from '@/lightning/dto/getLightningQueryDto';
 import { FilterLightningByDateDto } from '@/lightning/dto/filterLightningByDateDto';
 import { CreateLightningExcelDto } from '@/lightning/dto/create-lightning-excel.dto';
+import { CreateLightningQueryDto } from '@/lightning/dto/create-lightning-query-dto';
+import { CreateLightningQueryExcelDto } from '@/lightning/dto/create-lightning-query-excel-dto';
+import { FilterLightningByLightningDataDto } from '@/lightning/dto/filterLightningByLightningDataDto';
 
 @ApiTags('Lightning')
 @Controller('lightning')
@@ -28,16 +31,15 @@ export class LightningController {
   @Post('/insert')
   async saveLightning(
     @Req() req: Request,
-    @Query('user_id') userId: string,
+    @Query() dtoQuery: CreateLightningQueryDto,
     @Body() dto: CreateLightningDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 
-    dto.user_id = userId;
-
     const result = await this.lightningService.saveLightning(
       dto,
+      dtoQuery,
       ipAddress,
       userAgent,
     );
@@ -49,16 +51,15 @@ export class LightningController {
   @Post('/insert-excel')
   async saveLightningExcel(
     @Req() req: Request,
-    @Query('user_id') userId: string,
+    @Query() dtoQuery: CreateLightningQueryExcelDto,
     @Body() dto: CreateLightningExcelDto,
   ) {
     const ipAddress = req.ip as string;
     const userAgent = req.headers['user-agent'] as string;
 
-    dto.user_id = userId;
-
     const result = await this.lightningService.saveExcelLightning(
       dto,
+      dtoQuery,
       ipAddress,
       userAgent,
     );
@@ -110,19 +111,14 @@ export class LightningController {
   @ApiOkResponse({
     description: 'Berhasil mendapatkan semua data petir',
   })
-  @Get('/get-all')
-  async getAllLightning() {
-    const result = await this.lightningService.getAllLightning();
-    return result;
-  }
 
   // Route untuk ambil data petir berdasarkan id
   @ApiOkResponse({
     description: 'Berhasil mendapatkan data petir berdasarkan id',
   })
-  @Get('/get')
+  @Get('/get-by-id')
   async getLightning(@Query() querys: GetLightningQueryDto) {
-    const result = await this.lightningService.getLightningById(querys.id);
+    const result = await this.lightningService.getLightningById(querys);
     return result;
   }
 
@@ -133,5 +129,16 @@ export class LightningController {
   @Get('/get-by-date')
   async getLightningByDate(@Query() query: FilterLightningByDateDto) {
     return await this.lightningService.getLightningByDate(query);
+  }
+
+  // Route untuk ambil data petir berdasarkan rentang tanggal
+  @ApiOkResponse({
+    description: 'Berhasil mendapatkan data petir berdasarkan nama data',
+  })
+  @Get('/get-by-lightning-data')
+  async getLightningByLightningData(
+    @Query() query: FilterLightningByLightningDataDto,
+  ) {
+    return await this.lightningService.getLightningByLightningData(query);
   }
 }

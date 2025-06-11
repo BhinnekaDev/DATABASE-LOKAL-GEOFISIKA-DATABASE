@@ -148,12 +148,12 @@ export class EarthquakeController {
     return result;
   }
 
-  // Route untuk ambil data gempa berdasarkan rentang tanggal
+  // Route untuk ambil data gempa berdasarkan rentang data
   @ApiOkResponse({
-    description: 'Berhasil mendapatkan data gempa berdasarkan rentang tanggal',
+    description: 'Berhasil mendapatkan data gempa berdasarkan rentang data',
   })
-  @Get('/get-by-date')
-  async getEarthquakeByDate(@Query() query: FilterEarthquakeByDateDto) {
-    return await this.earthquakeService.getEarthquakeByDate(query);
+  @Get('/get-by-all-data')
+  async getEarthquakeByAllData(@Query() query: FilterEarthquakeByDateDto) {
+    return await this.earthquakeService.getEarthquakeByAllData(query);
   }
 }

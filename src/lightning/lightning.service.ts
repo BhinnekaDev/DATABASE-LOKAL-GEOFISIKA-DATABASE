@@ -9,9 +9,13 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { EditLightningDto } from '@/lightning/dto/edit-lightning.dto';
 import { ActivityLogService } from '@/activity-log/activity-log.service';
 import { CreateLightningDto } from '@/lightning/dto/create-lightning.dto';
+import { GetLightningQueryDto } from '@/lightning/dto/getLightningQueryDto';
 import { LightningDataExcel } from '@/lightning/interfaces/LightningDataExcel';
 import { FilterLightningByDateDto } from '@/lightning/dto/filterLightningByDateDto';
 import { CreateLightningExcelDto } from '@/lightning/dto/create-lightning-excel.dto';
+import { CreateLightningQueryDto } from '@/lightning/dto/create-lightning-query-dto';
+import { CreateLightningQueryExcelDto } from '@/lightning/dto/create-lightning-query-excel-dto';
+import { FilterLightningByLightningDataDto } from '@/lightning/dto/filterLightningByLightningDataDto';
 
 dotenv.config();
 
@@ -113,10 +117,12 @@ export class LightningService {
    */
   async saveLightning(
     dto: CreateLightningDto,
+    dtoQuery: CreateLightningQueryDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, name, date, file_base64 } = dto;
+    const { name, date, file_base64 } = dto;
+    const { user_id, lightning_data } = dtoQuery;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -135,8 +141,17 @@ export class LightningService {
     const fileName = `${uuidv4()}.jpg`;
     const bucketName = 'lightning';
 
+    // 🔧 Perbaiki format base64 jika tidak standar
+    let fixedBase64 = file_base64;
+    if (fixedBase64.startsWith('data:@file/jpeg;base64,')) {
+      fixedBase64 = fixedBase64.replace(
+        'data:@file/jpeg;base64,',
+        'data:image/jpeg;base64,',
+      );
+    }
+
     // Convert base64 ke Buffer
-    const base64Data = file_base64.replace(/^data:image\/\w+;base64,/, '');
+    const base64Data = fixedBase64.replace(/^data:image\/\w+;base64,/, '');
     const fileBuffer = Buffer.from(base64Data, 'base64');
 
     // Unggah ke Supabase
@@ -155,7 +170,7 @@ export class LightningService {
       };
     }
 
-    // 3. Simpan ke database
+    // 3. Ambil URL publik dari file yang diunggah
     const { data: publicUrlData } = this.supabase.storage
       .from(bucketName)
       .getPublicUrl(fileName);
@@ -167,6 +182,7 @@ export class LightningService {
         .insert({
           name,
           date,
+          lightning_data,
           file_url: publicUrlData.publicUrl,
         })
         .select()
@@ -206,10 +222,12 @@ export class LightningService {
    */
   async saveExcelLightning(
     dto: CreateLightningExcelDto,
+    dtoQuery: CreateLightningQueryExcelDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, file_base64 } = dto;
+    const { file_base64 } = dto;
+    const { user_id, lightning_data } = dtoQuery;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -272,6 +290,7 @@ export class LightningService {
         return {
           name: lightning,
           date: formattedDate,
+          lightning_data,
         };
       })
       .filter((row) => row !== null);
@@ -368,7 +387,16 @@ export class LightningService {
 
     // 3. Jika terdapat file baru, hapus file lama dan upload file baru
     if (file_base64) {
-      // Jika file_url sudah ada, hapus file lama dari storage
+      // 🔧 Perbaiki format base64 jika tidak standar
+      let fixedBase64 = file_base64;
+      if (fixedBase64.startsWith('data:@file/jpeg;base64,')) {
+        fixedBase64 = fixedBase64.replace(
+          'data:@file/jpeg;base64,',
+          'data:image/jpeg;base64,',
+        );
+      }
+
+      // Jika file lama ada, hapus dari storage
       if (lightningData.file_url) {
         const parts = lightningData.file_url.split('/');
         const oldFileName = parts[parts.length - 1];
@@ -378,7 +406,7 @@ export class LightningService {
 
       // Upload file baru
       const newFileName = `${uuidv4()}.jpg`;
-      const base64Data = file_base64.replace(/^data:image\/\w+;base64,/, '');
+      const base64Data = fixedBase64.replace(/^data:image\/\w+;base64,/, '');
       const fileBuffer = Buffer.from(base64Data, 'base64');
 
       const { error: uploadError } = await this.supabase.storage
@@ -423,6 +451,12 @@ export class LightningService {
         error: updateError,
       };
     }
+
+    return {
+      success: true,
+      message: 'Data petir berhasil diperbarui',
+      data: updatedRecord,
+    };
 
     // 5. Mencatat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
@@ -543,30 +577,11 @@ export class LightningService {
   }
 
   /**
-   * Mengambil semua data petir
-   */
-  async getAllLightning() {
-    const { data, error } = await this.supabase.from('lightning').select('*');
-
-    if (error || !data) {
-      return {
-        success: false,
-        message: 'Gagal mengambil data petir',
-        error,
-      };
-    }
-
-    return {
-      success: true,
-      message: 'Berhasil mengambil semua data petir',
-      data: data,
-    };
-  }
-
-  /**
    * Mengambil semua data petir berdasarkan id
    */
-  async getLightningById(id: number) {
+  async getLightningById(dto: GetLightningQueryDto) {
+    const { id, lightning_data } = dto;
+
     const { data, error } = await this.supabase
       .from('lightning')
       .select('*')
@@ -583,34 +598,70 @@ export class LightningService {
 
     return {
       success: true,
-      message: 'Berhasil mengambil data petir berdasarkan id',
+      message: `Berhasil mengambil data petir ${lightning_data} berdasarkan id`,
       data,
     };
   }
 
   /**
-   * Mengambil data petir berdasarkan rentang tanggal
+   * Mengambil data petir berdasarkan nama dan rentang tanggal (jika ada)
    */
   async getLightningByDate(dto: FilterLightningByDateDto) {
-    const { start_date, end_date } = dto;
+    const { lightning_data, start_date, end_date } = dto;
 
-    const { data, error } = await this.supabase
+    // Mulai query dengan filter nama data petir
+    let query = this.supabase
       .from('lightning')
       .select('*')
-      .gte('date', start_date)
-      .lte('date', end_date);
+      .eq('lightning_data', lightning_data);
 
-    if (error || !data) {
+    if (start_date) {
+      query = query.gte('date', start_date);
+    }
+
+    if (end_date) {
+      query = query.lte('date', end_date);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
       return {
         success: false,
-        message: 'Gagal mengambil data petir berdasarkan rentang tanggal',
+        message: 'Gagal mengambil data petir berdasarkan filter',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data petir berdasarkan rentang tanggal',
+      message: 'Berhasil mengambil data petir berdasarkan filter',
+      data,
+    };
+  }
+
+  /**
+   * Mengambil data petir berdasarkan nama data
+   */
+  async getLightningByLightningData(dto: FilterLightningByLightningDataDto) {
+    const { lightning_data } = dto;
+
+    const { data, error } = await this.supabase
+      .from('lightning')
+      .select('*')
+      .eq('lightning_data', lightning_data);
+
+    if (error || !data) {
+      return {
+        success: false,
+        message: 'Gagal mengambil data petir berdasarkan nama data',
+        error,
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Berhasil mengambil data petir berdasarkan nama data',
       data,
     };
   }

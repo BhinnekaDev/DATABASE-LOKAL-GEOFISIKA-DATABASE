@@ -1,9 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class GetLightningQueryDto {
-  @ApiProperty({ example: 1, description: 'ID data petir' })
-  id: number;
+export class CreateLightningQueryExcelDto {
+  @ApiProperty({
+    example: 'ID User Admin',
+    description: 'Admin melakukan insert',
+  })
+  @IsNotEmpty()
+  @IsString()
+  user_id: string;
 
   @ApiProperty({
     example: 'Sebagai Contoh (IKL, KML, LDC, Summaries, CSV, SRF)',

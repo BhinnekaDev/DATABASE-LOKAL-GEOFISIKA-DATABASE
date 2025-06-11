@@ -738,28 +738,71 @@ export class EarthquakeService {
   }
 
   /**
-   * Mengambil data gempa berdasarkan rentang tanggal
+   * Mengambil data gempa berdasarkan rentang tanggal, magnitude, dan kedalaman
    */
-  async getEarthquakeByDate(dto: FilterEarthquakeByDateDto) {
-    const { start_date, end_date } = dto;
+  async getEarthquakeByAllData(dto: FilterEarthquakeByDateDto) {
+    const {
+      start_date,
+      end_date,
+      min_magnitude,
+      max_magnitude,
+      min_depth,
+      max_depth,
+      min_lat,
+      max_lat,
+      min_long,
+      max_long,
+    } = dto;
 
-    const { data, error } = await this.supabase
-      .from('earthquake')
-      .select('*')
-      .gte('date', start_date)
-      .lte('date', end_date);
+    let query = this.supabase.from('earthquake').select('*');
+
+    if (start_date) {
+      query = query.gte('date', start_date);
+    }
+
+    if (end_date) {
+      query = query.lte('date', end_date);
+    }
+
+    if (min_magnitude) {
+      query = query.gte('magnitude', parseFloat(min_magnitude));
+    }
+
+    if (max_magnitude) {
+      query = query.lte('magnitude', parseFloat(max_magnitude));
+    }
+
+    if (min_depth) {
+      query = query.gte('depth', parseFloat(min_depth));
+    }
+
+    if (max_depth) {
+      query = query.lte('depth', parseFloat(max_depth));
+    }
+
+    if (min_lat && max_lat && min_long && max_long) {
+      query = query
+        .gte('latitude', parseFloat(min_lat))
+        .lte('latitude', parseFloat(max_lat))
+        .gte('longitude', parseFloat(min_long))
+        .lte('longitude', parseFloat(max_long));
+    }
+
+    const { data, error } = await query;
 
     if (error || !data) {
       return {
         success: false,
-        message: 'Gagal mengambil data gempa berdasarkan rentang tanggal',
+        message:
+          'Gagal mengambil data gempa berdasarkan filter tanggal, magnitude, dan kedalaman',
         error,
       };
     }
 
     return {
       success: true,
-      message: 'Berhasil mengambil data gempa berdasarkan rentang tanggal',
+      message:
+        'Berhasil mengambil data gempa berdasarkan filter tanggal, magnitude, dan kedalaman',
       data,
     };
   }

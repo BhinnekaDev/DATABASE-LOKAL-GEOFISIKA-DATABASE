@@ -60,4 +60,15 @@ export class AuthController {
 
     return this.authService.signIn(loginDto, ip_address, user_agent);
   }
+
+  // Route untuk keluar
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout pengguna' })
+  @ApiResponse({
+    status: 200,
+    description: 'Logout berhasil.',
+  })
+  async logout() {
+    return this.authService.logout();
+  }
 }

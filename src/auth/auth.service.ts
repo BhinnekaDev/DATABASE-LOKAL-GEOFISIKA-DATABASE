@@ -229,4 +229,11 @@ export class AuthService {
       role: role,
     };
   }
+
+  // Fungsi untuk logout admin atau operator
+  async logout(): Promise<{ message: string }> {
+    return {
+      message: 'Logout berhasil',
+    };
+  }
 }

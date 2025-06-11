@@ -2,10 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsDateString } from 'class-validator';
 
 export class CreateLightningDto {
-  @IsNotEmpty()
-  @IsString()
-  user_id: string;
-
   @ApiProperty({ example: '2025-05-08', description: 'Tanggal petir' })
   @IsNotEmpty()
   @IsDateString()

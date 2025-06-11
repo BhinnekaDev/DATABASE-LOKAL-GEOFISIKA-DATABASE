@@ -1,6 +1,7 @@
 import { Buffer } from 'buffer';
 import * as dotenv from 'dotenv';
 import * as ExcelJS from 'exceljs';
+import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
@@ -109,15 +110,12 @@ export class RainIntensityService {
     return null;
   }
 
-  /**
-   * Menyimpan data intensitas hujan dan mencatat ke activity log
-   */
   async saveRainIntensity(
     dto: CreateRainIntensityDto,
     ipAddress: string,
     userAgent: string,
   ) {
-    const { user_id, date, name } = dto;
+    const { user_id, date, name, file_base64 } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -132,11 +130,61 @@ export class RainIntensityService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
-    // 2. Simpan data intensitas hujan
+    // 2. Normalisasi prefix base64
+    let fixedBase64 = file_base64;
+
+    // Jika prefix tidak valid, perbaiki ke format yang benar
+    if (fixedBase64.startsWith('data:@file/jpeg;base64,')) {
+      fixedBase64 = fixedBase64.replace(
+        'data:@file/jpeg;base64,',
+        'data:image/jpeg;base64,',
+      );
+    } else if (!fixedBase64.startsWith('data:image/jpeg;base64,')) {
+      return {
+        success: false,
+        message: 'Format base64 tidak dikenali atau tidak valid',
+        error: 'Invalid base64 prefix',
+      };
+    }
+
+    // Strip prefix base64 dan konversi ke buffer
+    const base64Data = fixedBase64.replace(/^data:image\/\w+;base64,/, '');
+    const fileBuffer = Buffer.from(base64Data, 'base64');
+
+    // Nama file unik
+    const fileName = `${uuidv4()}.jpg`;
+    const bucketName = 'rain-intensity';
+
+    // Unggah ke Supabase Storage
+    const { error: uploadError } = await this.supabase.storage
+      .from(bucketName)
+      .upload(fileName, fileBuffer, {
+        contentType: 'image/jpeg',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      return {
+        success: false,
+        message: 'Gagal mengunggah file ke Storage Supabase',
+        error: uploadError,
+      };
+    }
+
+    // Ambil public URL file yang baru diupload
+    const { data: publicUrlData } = this.supabase.storage
+      .from(bucketName)
+      .getPublicUrl(fileName);
+
+    // Simpan data ke tabel rain_intensity
     const { data: insertedRainIntensity, error: rainIntensityError } =
       await this.supabase
         .from('rain_intensity')
-        .insert({ date, name })
+        .insert({
+          date,
+          name,
+          file_url: publicUrlData.publicUrl,
+        })
         .select();
 
     if (rainIntensityError || !insertedRainIntensity) {
@@ -147,7 +195,7 @@ export class RainIntensityService {
       };
     }
 
-    // 3. Mencatat ke activity log
+    // 3. Catat ke activity log
     const createdAt = new Date().toLocaleString('en-US', {
       timeZone: 'Asia/Jakarta',
     });
@@ -299,7 +347,7 @@ export class RainIntensityService {
     ipAddress: string,
     userAgent: string,
   ) {
-    const { id, user_id, date, name } = dto;
+    const { id, user_id, date, name, file_base64 } = dto;
 
     // 1. Ambil data admin
     const adminResponse = await this.getAdminData(user_id);
@@ -314,11 +362,77 @@ export class RainIntensityService {
     const { first_name, last_name } = adminResponse.data;
     const namaAdmin = `${first_name} ${last_name}`;
 
+    // Ambil data intensitas hujan
+    const { data: rainIntensityData, error: rainIntensityFetchError } =
+      await this.supabase
+        .from('rain_intensity')
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (rainIntensityFetchError || !rainIntensityData) {
+      return {
+        success: false,
+        message: 'Data intensitas hujan tidak ditemukan',
+        error: rainIntensityFetchError,
+      };
+    }
+
+    const bucketName = 'rain-intensity';
+    let newFileUrl = rainIntensityData.file_url;
+
+    // 3. Jika terdapat file baru, hapus file lama dan upload file baru
+    if (file_base64) {
+      // Jika file_url sudah ada, hapus file lama dari storage
+      if (rainIntensityData.file_url) {
+        const parts = rainIntensityData.file_url.split('/');
+        const oldFileName = parts[parts.length - 1];
+
+        await this.supabase.storage.from(bucketName).remove([oldFileName]);
+      }
+
+      // 🔧 Perbaiki jika format base64 tidak standar
+      let fixedBase64 = file_base64;
+      if (fixedBase64.startsWith('data:@file/jpeg;base64,')) {
+        fixedBase64 = fixedBase64.replace(
+          'data:@file/jpeg;base64,',
+          'data:image/jpeg;base64,',
+        );
+      }
+
+      // Upload file baru
+      const newFileName = `${uuidv4()}.jpg`;
+      const base64Data = fixedBase64.replace(/^data:image\/\w+;base64,/, '');
+      const fileBuffer = Buffer.from(base64Data, 'base64');
+
+      const { error: uploadError } = await this.supabase.storage
+        .from(bucketName)
+        .upload(newFileName, fileBuffer, {
+          contentType: 'image/jpeg',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        return {
+          success: false,
+          message: 'Gagal mengunggah file ke Storage Supabase',
+          error: uploadError,
+        };
+      }
+
+      // Ambil URL publik dari file yang baru diunggah
+      const { data: publicUrlData } = this.supabase.storage
+        .from(bucketName)
+        .getPublicUrl(newFileName);
+
+      newFileUrl = publicUrlData.publicUrl;
+    }
+
     // 2. Update data intensitas hujan berdasarkan id
     const { data: updatedRainIntensity, error: rainIntensityError } =
       await this.supabase
         .from('rain_intensity')
-        .update({ name, date })
+        .update({ name, date, file_url: newFileUrl })
         .eq('id', id)
         .select();
 
@@ -390,6 +504,26 @@ export class RainIntensityService {
     }
 
     const { name, date } = rainIntensityData;
+
+    const bucketName = 'rain-intensity';
+
+    // 3. Hapus file dari storage jika ada file_url
+    if (rainIntensityData.file_url) {
+      const parts = rainIntensityData.file_url.split('/');
+      const fileName = parts[parts.length - 1];
+
+      const { error: deleteFileError } = await this.supabase.storage
+        .from(bucketName)
+        .remove([fileName]);
+
+      if (deleteFileError) {
+        return {
+          success: false,
+          message: 'Gagal menghapus file dari Storage Supabase',
+          error: deleteFileError,
+        };
+      }
+    }
 
     // 3. Hapus data intensitas hujan berdasarkan id
     const { error: deleteRainIntensityError } = await this.supabase
