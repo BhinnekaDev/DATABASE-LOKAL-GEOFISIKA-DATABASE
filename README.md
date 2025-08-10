@@ -9,6 +9,9 @@ Dibangun modular dan scalable menggunakan **NestJS** dan **Supabase**.
 > Backend ini menyediakan data dan layanan API untuk mendukung riset, monitoring, dan aplikasi berbasis data geofisika di wilayah Bengkulu.
 
 [![GitHub Repo](https://img.shields.io/badge/github-BhinnekaDev-blue?logo=github\&style=flat-square)](https://github.com/BhinnekaDev/DATABASE-LOKAL-GEOFISIKA-DATABASE)
+[![Stars](https://img.shields.io/github/stars/BhinnekaDev/DATABASE-LOKAL-GEOFISIKA-DATABASE?style=flat-square)](https://github.com/BhinnekaDev/DATABASE-LOKAL-GEOFISIKA-DATABASE/stargazers)
+[![Forks](https://img.shields.io/github/forks/BhinnekaDev/DATABASE-LOKAL-GEOFISIKA-DATABASE?style=flat-square)](https://github.com/BhinnekaDev/DATABASE-LOKAL-GEOFISIKA-DATABASE/network/members)
+[![Last Commit](https://img.shields.io/github/last-commit/BhinnekaDev/DATABASE-LOKAL-GEOFISIKA-DATABASE?style=flat-square)](https://github.com/BhinnekaDev/DATABASE-LOKAL-GEOFISIKA-DATABASE/commits/main)
 
 ![Platform](https://img.shields.io/badge/platform-API-blue?style=flat-square)
 ![NestJS](https://img.shields.io/badge/NestJS-9-red?logo=nestjs\&style=flat-square)
